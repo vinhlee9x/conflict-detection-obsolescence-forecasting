@@ -1,7 +1,7 @@
 ---
 phase: 8
 title: "Tổng hợp kết quả và chuẩn bị báo cáo"
-status: pending
+status: in-progress
 priority: P2
 effort: 4h
 depends_on: [5, 6, 7]

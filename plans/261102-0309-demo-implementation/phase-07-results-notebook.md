@@ -1,7 +1,7 @@
 ---
 phase: 7
 title: "Notebook kết quả và biểu đồ"
-status: pending
+status: completed
 priority: P1
 effort: 5h
 depends_on: [5, 6]

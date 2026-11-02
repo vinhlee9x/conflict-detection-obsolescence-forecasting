@@ -25,26 +25,29 @@ class KnowledgeGraph:
     ):
         self.doc_ids = list(doc_ids)
         self.index = {d: i for i, d in enumerate(self.doc_ids)}
-        usable = edges[~edges["type"].isin(exclude_types)]
-        if "is_label_edge" in usable:
-            usable = usable[~usable["is_label_edge"].fillna(False).astype(bool)]
-        usable = usable[usable["src"].isin(self.index) & usable["dst"].isin(self.index)]
-        self.edges = usable.reset_index(drop=True)
+        self.edges = edges.reset_index(drop=True)
+        self.exclude_types = set(exclude_types)
         self.edge_weights = edge_weights
         self.default_weight = default_weight
         self._rebuild()
 
+    def propagation_edges(self) -> pd.DataFrame:
+        usable = self.edges[~self.edges["type"].isin(self.exclude_types)]
+        if "is_label_edge" in usable:
+            usable = usable[~usable["is_label_edge"].fillna(False).astype(bool)]
+        return usable[usable["src"].isin(self.index) & usable["dst"].isin(self.index)]
+
     def _rebuild(self) -> None:
         n = len(self.doc_ids)
-        rows = self.edges["src"].map(self.index).to_numpy()
-        cols = self.edges["dst"].map(self.index).to_numpy()
-        weights = self.edges["type"].map(lambda t: self.edge_weights.get(t, self.default_weight)).to_numpy(dtype=float)
+        usable = self.propagation_edges()
+        rows = usable["src"].map(self.index).to_numpy()
+        cols = usable["dst"].map(self.index).to_numpy()
+        weights = usable["type"].map(lambda t: self.edge_weights.get(t, self.default_weight)).to_numpy(dtype=float)
         adjacency = sp.coo_matrix((weights, (rows, cols)), shape=(n, n)).tocsr()
         adjacency = adjacency + adjacency.T
         degree = np.asarray(adjacency.sum(axis=1)).ravel()
         inverse = np.divide(1.0, degree, out=np.zeros_like(degree), where=degree > 0)
         self.transition = (sp.diags(inverse) @ adjacency).tocsr()
-        self._cache: dict[tuple, np.ndarray] = {}
 
     def add_edges(self, new_edges: pd.DataFrame) -> None:
         self.edges = pd.concat([self.edges, new_edges], ignore_index=True)

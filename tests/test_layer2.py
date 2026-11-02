@@ -73,3 +73,21 @@ def test_group_split_never_shares_a_root():
     dev_groups = set(split.loc[split["split"] == "dev", ["group_a", "group_b"]].stack())
     test_groups = set(split.loc[split["split"] == "test", ["group_a", "group_b"]].stack())
     assert dev_groups and test_groups and not dev_groups & test_groups
+
+
+def test_detect_candidates_scores_new_documents_and_confirms_edges():
+    from src.conflict import confirm_conflicts, detect_candidates
+    from src.similarity import DocumentVectors
+
+    docs = pd.DataFrame({"doc_id": ["A", "B", "C", "N"], "tenant": ["t", "t", "t", "t"]})
+    vectors = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.98, 0.2, 0]], dtype=np.float32)
+    vectors /= np.linalg.norm(vectors, axis=1, keepdims=True)
+    edges = pd.DataFrame({"src": ["N", "A"], "dst": ["A", "B"], "type": ["REFERENCES", "REFERENCES"]})
+    graph = KnowledgeGraph(docs["doc_id"].tolist(), edges)
+    config = {"tenants": {"t": {"FUSION_LAMBDA": 0.7, "CONFLICT_THRESHOLD_TAU": 0.5, "s_min": 0.0, "s_max": 1.0}}, "global": {}}
+    candidates = detect_candidates(["N"], docs, DocumentVectors(vectors, docs["doc_id"].to_numpy()), graph, config, top_k=2)
+    assert candidates["candidate_id"].tolist() == ["A"]
+    before = graph.pair_scores(["N"], ["A"])
+    confirm_conflicts(graph, candidates)
+    assert np.allclose(graph.pair_scores(["N"], ["A"]), before)
+    assert (graph.edges["type"] == "CONFLICTS_WITH").sum() == 1

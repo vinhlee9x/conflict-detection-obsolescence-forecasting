@@ -7,6 +7,15 @@ from src.paths import ARTIFACTS, DATA_PROCESSED, ROOT
 from src.plots import MODEL_LABELS, TENANT_LABELS, VARIANT_LABELS
 
 
+DOC_LABELS = {
+    "root": "Tài liệu gốc",
+    "conflict": "Bản sửa có mâu thuẫn",
+    "paraphrase": "Bản sửa diễn đạt lại",
+    "hidden_conflict": "Tài liệu mâu thuẫn ẩn",
+    "lexical_overlap": "Tài liệu trùng từ vựng",
+}
+
+
 def _fmt(value, digits=3):
     return f"{value:.{digits}f}" if isinstance(value, float) else str(value)
 
@@ -22,7 +31,7 @@ def dataset_section() -> str:
     docs = read_parquet(DATA_PROCESSED / "kb_docs.parquet")
     pairs = read_parquet(ARTIFACTS / "kb" / "scored_pairs.parquet")
     by_doc = docs.groupby(["tenant", "variant_type"]).size().unstack(0, fill_value=0)
-    by_doc.index = [VARIANT_LABELS.get(v, "Tài liệu gốc") for v in by_doc.index]
+    by_doc.index = [DOC_LABELS[v] for v in by_doc.index]
     by_pair = pairs.groupby(["variant_type", "split"]).size().unstack(fill_value=0)
     by_pair.insert(0, "nhãn", pairs.groupby("variant_type")["label"].first())
     by_pair.index = [VARIANT_LABELS.get(v, v) for v in by_pair.index]

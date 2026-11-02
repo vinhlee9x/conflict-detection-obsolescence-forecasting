@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "Layer 1: tiền xử lý và embedding"
-status: pending
+status: completed
 priority: P1
 effort: 6h
 depends_on: [2, 3]

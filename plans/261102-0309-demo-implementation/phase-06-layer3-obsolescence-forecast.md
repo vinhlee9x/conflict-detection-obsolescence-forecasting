@@ -1,7 +1,7 @@
 ---
 phase: 6
 title: "Layer 3: dự báo lỗi thời"
-status: pending
+status: completed
 priority: P1
 effort: 12h
 depends_on: [5]

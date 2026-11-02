@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "Dataset Jira và ViNLI"
-status: pending
+status: in-progress
 priority: P2
 effort: 10h
 depends_on: [1]

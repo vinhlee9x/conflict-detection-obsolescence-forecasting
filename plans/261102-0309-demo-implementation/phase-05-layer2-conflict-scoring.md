@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Layer 2: lan truyền đồ thị, fusion, calibration"
-status: pending
+status: completed
 priority: P1
 effort: 12h
 depends_on: [4]

@@ -112,6 +112,19 @@ summary''',
 pd.DataFrame(results["test"])[["scope", "method_label", "lambda", "tau", "precision", "recall", "f1", "f1_ci95", "pr_auc"]]''',
     '''pd.DataFrame(results["test_by_variant"])''',
     '''{tenant: {k: cfg[k] for k in ("FUSION_LAMBDA", "CONFLICT_THRESHOLD_TAU", "dev_f1")} for tenant, cfg in results["config"]["tenants"].items()}''',
+    "md:## Luồng end-to-end: tài liệu mới → candidate → xác nhận\n\nLấy 3 tài liệu ban hành gần nhất làm ví dụ; người dùng xác nhận candidate đầu tiên.",
+    '''from src.conflict import confirm_conflicts, detect_candidates
+from src.graph import KnowledgeGraph
+from src.io_utils import read_parquet
+from src.paths import DATA_PROCESSED
+docs = read_parquet(DATA_PROCESSED / "kb_docs.parquet")
+edges = read_parquet(DATA_PROCESSED / "kb_edges.parquet")
+new_ids = docs.sort_values("issued_at").doc_id.tail(3).tolist()
+graph = KnowledgeGraph(docs.doc_id.tolist(), edges)
+candidates = detect_candidates(new_ids, docs, pipeline.load_vectors("kb"), graph, results["config"], top_k=15)
+candidates''',
+    '''confirm_conflicts(graph, candidates.head(1))
+graph.edges[graph.edges.type == "CONFLICTS_WITH"]''',
     '''import os
 if os.path.exists("data/processed/jira_pairs.parquet"):
     jira = pipeline.layer2("jira")
