@@ -197,6 +197,7 @@ summary["rows"], summary["positives"], summary["best_alpha"]''',
 RESULTS = [
     "md:# 04. Kết quả và biểu đồ\n\nChỉ đọc file trong `data/processed/` và `artifacts/`, chạy trên CPU trong vài giây. Hình được lưu vào `docs/figures/`.",
     SETUP,
+    DRIVE_SYNC,
     '''%matplotlib inline
 import numpy as np, pandas as pd
 from src import plots
@@ -234,6 +235,20 @@ table[["scope", "method_label", "lambda", "tau", "precision", "recall", "f1", "f
     '''for tenant in sorted(scored.tenant.unique()):
     show(plots.score_distribution(scored, tenant), f"07_score_distribution_{tenant}")
 pd.DataFrame(layer2["test_by_variant"]).round(2)''',
+    "md:## 3b. Layer 2 trên Jira (dữ liệu thật)\n\nMỗi project Jira là một doanh nghiệp (tenant). Cặp dương là link Duplicate/Supersede, nên đây là nhãn proxy cho trùng lặp hoặc thay thế, không phải mâu thuẫn theo nghĩa hẹp. Cần chạy notebook 01 với `RUN_JIRA = True` rồi notebook 02 trước.",
+    '''jira_dir = ARTIFACTS / "jira"
+HAS_JIRA = (jira_dir / "layer2_results.json").exists()
+if HAS_JIRA:
+    jira_grid = pd.read_csv(jira_dir / "grid_results.csv")
+    jira_config = read_json(jira_dir / "config.json")
+    jira_layer2 = read_json(jira_dir / "layer2_results.json")
+    display(pd.DataFrame(jira_layer2["counts"]))
+    display(pd.DataFrame(jira_layer2["test"])[["scope", "method_label", "lambda", "tau", "precision", "recall", "f1", "f1_ci95", "pr_auc"]].round(3))
+else:
+    print("Chưa có kết quả Jira trong", jira_dir)''',
+    '''if HAS_JIRA:
+    show(plots.tenant_heatmaps(jira_grid, jira_config), "13_jira_grid_heatmaps")
+    show(plots.threshold_curves(jira_grid, jira_config), "14_jira_threshold_curves")''',
     "md:## 4. Layer 3: dự báo lỗi thời",
     '''pd.DataFrame(layer3["test"]).round(3)''',
     '''models = [row["model"] for row in layer3["test"]]
