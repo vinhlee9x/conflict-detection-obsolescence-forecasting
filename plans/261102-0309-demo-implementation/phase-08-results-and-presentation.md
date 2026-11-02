@@ -29,10 +29,10 @@ docs/results.md              # bảng và hình cuối cùng, kèm cách tái t�
    - Bảng Layer 3 ba model và thời gian suy luận.
 2. Viết phần "Hạn chế" thẳng thắn: Jira dùng nhãn proxy, KB là dữ liệu tổng hợp, p yếu với mâu thuẫn ẩn.
 3. Phần kiến trúc trong báo cáo nhắc PostgreSQL + pgvector như hướng triển khai thực tế, nói rõ demo dùng numpy và NetworkX.
-4. Diễn tập trên đúng máy sẽ demo: tắt mạng, chạy app, đi qua kịch bản 5–7 phút theo thứ tự tab 1 → 2 → 3 → 6 → 4 → 5.
-5. Phương án dự phòng: notebook Colab "Run all" mở sẵn, và ảnh chụp màn hình từng tab trong slide.
+4. Đưa hình từ `docs/figures/` vào slide theo thứ tự: dataset, động lực (ViNLI), Layer 2, Layer 3.
+5. Diễn tập 5–7 phút; mở sẵn notebook 04 đã chạy để trả lời nếu thầy hỏi chi tiết.
 
 ## Tiêu chí hoàn thành
 
 - Mọi con số trong slide và báo cáo truy được về một file trong `artifacts/`.
-- Buổi diễn tập chạy hết kịch bản không lỗi.
+- Slide có đủ hình và bảng, mỗi hình truy được về notebook 04.

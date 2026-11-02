@@ -35,7 +35,7 @@ artifacts/.gitkeep
 ## Các bước
 
 1. Tạo cấu trúc thư mục như sơ đồ trong tài liệu kế hoạch.
-2. Ghim phiên bản trong `requirements.txt`: `numpy`, `pandas`, `pyarrow`, `scipy`, `networkx`, `scikit-learn`, `xgboost`, `shap`, `streamlit`, `plotly`, `pyvis`, `joblib`, `pytest`. Python 3.11.
+2. Ghim phiên bản trong `requirements.txt`: `numpy`, `pandas`, `pyarrow`, `scipy`, `networkx`, `scikit-learn`, `xgboost`, `shap`, `matplotlib`, `plotly`, `ipywidgets`, `joblib`, `pytest`. Python 3.11.
 3. `requirements-colab.txt` thêm `FlagEmbedding` (hoặc `sentence-transformers`) và `tabpfn`. Không cài hai gói này trên local trừ khi demo end-to-end với tài liệu mới.
 4. `src/settings.py` gom mọi hằng số: `SEED = 42`, `K_HOPS = 3`, `GAMMA = 0.5`, `TOP_K_NEIGHBORS = 15`, `LAMBDA_GRID = 0.0..1.0 bước 0.05`, `TAU_GRID = 0.30..0.95 bước 0.01`.
 5. `notebooks/00_colab_setup.ipynb`: mount Google Drive, `git clone`, `pip install -r requirements-colab.txt`, symlink `data/` và `artifacts/` sang Drive để giữ kết quả giữa các session.

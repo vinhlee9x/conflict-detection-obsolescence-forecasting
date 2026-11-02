@@ -43,7 +43,7 @@ tests/test_forecast_features.py
 4. Student: XGBoost `binary:logistic` với target là `α·y + (1−α)·p_teacher`, α chọn trên validation (thử 0; 0,3; 0,5; 0,7; 1). Tuning nhẹ `max_depth`, `n_estimators` trên validation.
 5. Baseline: XGBoost chỉ học nhãn cứng (α = 1).
 6. Đánh giá trên test, xuất `layer3_results.json`: ROC-AUC, PR-AUC, Precision@k (k = 10, 20) cho ba model (XGBoost nhãn cứng, XGBoost distill, TabPFN), và thời gian suy luận trung bình mỗi tài liệu trên CPU.
-7. SHAP: `TreeExplainer` cho XGBoost, lưu giá trị cho các tài liệu ở mốc mới nhất để app tab 6 vẽ waterfall.
+7. SHAP: `TreeExplainer` cho XGBoost, lưu giá trị cho các tài liệu ở mốc mới nhất để notebook kết quả vẽ waterfall.
 8. Lưu `xgb.joblib` và `forecast_scores.parquet`.
 
 ## Kiểm tra
