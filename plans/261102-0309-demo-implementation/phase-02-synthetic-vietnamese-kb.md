@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Sinh KB tổng hợp tiếng Việt"
-status: pending
+status: in-progress
 priority: P1
 effort: 12h
 depends_on: [1]

@@ -1,0 +1,13 @@
+{
+  "backend": "bge-m3",
+  "split": "test",
+  "n": 2264,
+  "seconds": 263.43462628299994,
+  "mean_cosine": {
+    "contradiction": 0.6860887715984717,
+    "entailment": 0.7741017838319143,
+    "neutral": 0.6889188255889382
+  },
+  "auc_entailment_vs_contradiction": 0.7233649932157394,
+  "auc_contradiction_vs_neutral": 0.4956264657757195
+}

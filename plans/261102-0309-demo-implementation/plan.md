@@ -1,11 +1,11 @@
 ---
 title: "Triển khai demo phát hiện mâu thuẫn và dự báo lỗi thời"
-description: "Kế hoạch triển khai code, dataset, thí nghiệm và app Streamlit cho project cuối kỳ môn Học máy tiên tiến và ứng dụng."
-status: pending
+description: "Kế hoạch triển khai code, dataset, thí nghiệm và notebook kết quả cho project cuối kỳ môn Học máy tiên tiến và ứng dụng."
+status: in-progress
 priority: P1
-effort: 70h
+effort: 65h
 branch: claude/project-thread-aqb553
-tags: [ml, dataset, nlp, graph, streamlit, colab]
+tags: [ml, dataset, nlp, graph, colab]
 blockedBy: []
 blocks: []
 created: 2026-11-02
@@ -21,7 +21,7 @@ Kế hoạch này biến tài liệu [Kế hoạch demo và dataset](https://cla
 - Ba nguồn dữ liệu: KB tổng hợp tiếng Việt 2 tenant (nguồn chính), Jira subset (dữ liệu thật, nhãn proxy), ViNLI (kiểm tra tín hiệu mâu thuẫn tiếng Việt).
 - Layer 2: điểm `score = λ·s + (1−λ)·p`, λ và τ chọn bằng grid search trên dev theo từng tenant, báo cáo trên test.
 - Layer 3: TabPFN teacher, XGBoost student, có SHAP và đo thời gian suy luận.
-- App Streamlit chạy local chỉ từ file đã tính sẵn, không cần GPU và không cần mạng.
+- Notebook kết quả vẽ biểu đồ benchmark và thông số huấn luyện từ file đã tính sẵn, chạy được trên Colab hoặc local. Không làm web app.
 
 ## Ràng buộc và quyết định đã chốt
 
@@ -40,16 +40,16 @@ Kế hoạch này biến tài liệu [Kế hoạch demo và dataset](https://cla
 
 | # | Phase | Phụ thuộc | Ước lượng | Trạng thái |
 |---|---|---|---|---|
-| 01 | [Khởi tạo repo và môi trường](phase-01-repo-and-environment.md) | | 4h | pending |
-| 02 | [Sinh KB tổng hợp tiếng Việt](phase-02-synthetic-vietnamese-kb.md) | 01 | 12h | pending |
-| 03 | [Dataset Jira và ViNLI](phase-03-jira-and-vinli-datasets.md) | 01 | 10h | pending |
-| 04 | [Layer 1: tiền xử lý và embedding](phase-04-layer1-preprocess-embedding.md) | 02, 03 | 6h | pending |
-| 05 | [Layer 2: lan truyền đồ thị, fusion, calibration](phase-05-layer2-conflict-scoring.md) | 04 | 12h | pending |
-| 06 | [Layer 3: dự báo lỗi thời](phase-06-layer3-obsolescence-forecast.md) | 05 | 12h | pending |
-| 07 | [App Streamlit](phase-07-streamlit-demo-app.md) | 05, 06 | 10h | pending |
-| 08 | [Tổng hợp kết quả và chuẩn bị báo cáo](phase-08-results-and-presentation.md) | 05, 06, 07 | 4h | pending |
+| 01 | [Khởi tạo repo và môi trường](phase-01-repo-and-environment.md) | | 4h | done |
+| 02 | [Sinh KB tổng hợp tiếng Việt](phase-02-synthetic-vietnamese-kb.md) | 01 | 12h | done (còn kappa) |
+| 03 | [Dataset Jira và ViNLI](phase-03-jira-and-vinli-datasets.md) | 01 | 10h | code xong, chưa chạy Jira |
+| 04 | [Layer 1: tiền xử lý và embedding](phase-04-layer1-preprocess-embedding.md) | 02, 03 | 6h | done |
+| 05 | [Layer 2: lan truyền đồ thị, fusion, calibration](phase-05-layer2-conflict-scoring.md) | 04 | 12h | done |
+| 06 | [Layer 3: dự báo lỗi thời](phase-06-layer3-obsolescence-forecast.md) | 05 | 12h | done |
+| 07 | [Notebook kết quả và biểu đồ](phase-07-results-notebook.md) | 05, 06 | 5h | done |
+| 08 | [Tổng hợp kết quả và chuẩn bị báo cáo](phase-08-results-and-presentation.md) | 05, 06, 07 | 4h | đang làm |
 
-Phase 02 và 03 chạy song song được (hai người khác nhau). Phase 07 có thể bắt đầu tab 1–3 ngay sau phase 05, không cần đợi phase 06.
+Phase 02 và 03 chạy song song được (hai người khác nhau). Phase 07 có thể vẽ các biểu đồ Layer 2 ngay sau phase 05, không cần đợi phase 06.
 
 ## Luồng dữ liệu
 
@@ -66,8 +66,8 @@ flowchart LR
     C --> L3[Phase 06<br/>TabPFN teacher → XGBoost]
     L3 --> X[(xgb.joblib<br/>shap_values.npz)]
   end
-  subgraph Local["Máy local (lúc báo cáo)"]
-    APP[Phase 07<br/>Streamlit 6 tab]
+  subgraph Results["Colab hoặc local"]
+    APP[Phase 07<br/>notebook biểu đồ]
   end
   C --> APP
   X --> APP
@@ -81,7 +81,16 @@ flowchart LR
 3. Bảng ablation Layer 2 trên test có ba dòng (chỉ s, chỉ p, fusion) cho từng tenant, kèm λ, τ đã chọn trên dev.
 4. Bảng Layer 3 trên test có ba dòng (XGBoost nhãn cứng, XGBoost + soft-label TabPFN, TabPFN) với ROC-AUC, PR-AUC, Precision@k và thời gian suy luận.
 5. Báo cáo có Cohen's kappa của nhóm trên 100 cặp KB tổng hợp.
-6. `streamlit run app/streamlit_app.py` mở được trong dưới 10 giây khi đã tắt mạng.
+6. `notebooks/04_results.ipynb` chạy "Run all" ra đủ hình trong `docs/figures/`.
+
+## Ghi chú triển khai (2026-11-02)
+
+- KB tổng hợp sinh bằng template điều khoản có cấu trúc thay vì gọi LLM: nhãn đúng tuyệt đối, không cần API key, tái tạo được bằng seed. Quy mô 972 tài liệu (400 tài liệu gốc) thay vì 400–600, để tập test đủ lớn cho khoảng tin cậy bootstrap.
+- Bản sửa mâu thuẫn và bản diễn đạt lại đều đổi cách viết, thêm hoặc bớt điều khoản như nhau; chỉ khác ở chỗ bản mâu thuẫn đổi giá trị. Đây là điều kiện để cạnh đồ thị và độ dài văn bản không làm lộ nhãn.
+- ViNLI lấy từ bản mirror công khai `presencesw/vinli_4_label` trên Hugging Face.
+- TabPFN bản mới (9.x) bắt buộc token Prior Labs; code tải weight TabPFN v2 công khai trên Hugging Face và truyền qua `model_path`, không cần token.
+- XGBoost student dùng `XGBRegressor(objective="reg:logistic")` vì `XGBClassifier` không nhận soft-label.
+- Kết quả Layer 2 hiện tại: fusion không tốt hơn chỉ dùng s (λ chọn được 0,95–1,0). Nguồn lỗi chính là bản diễn đạt lại: s và p của chúng giống hệt bản mâu thuẫn. Xem `docs/results.md`.
 
 ## Rủi ro chính
 

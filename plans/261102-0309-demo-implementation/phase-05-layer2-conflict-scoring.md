@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Layer 2: lan truyền đồ thị, fusion, calibration"
-status: pending
+status: completed
 priority: P1
 effort: 12h
 depends_on: [4]
@@ -52,7 +52,7 @@ tests/test_conflict.py
    - Kết quả riêng trên nhóm "mâu thuẫn ẩn" để nói thẳng điểm yếu của p.
    - Cùng bảng cho Jira nếu có.
 6. Phân tích ViNLI: histogram cosine theo ba nhãn, kèm AUC của s khi phân biệt contradiction với entailment. Đưa hình vào báo cáo làm động lực cho p.
-7. Hàm `detect_candidates(new_doc_ids, tenant)` trong `conflict.py`: trả danh sách cặp có score > τ để app tab 5 dùng; khi người dùng xác nhận thì thêm cạnh CONFLICTS_WITH vào đồ thị trong bộ nhớ.
+7. Hàm `detect_candidates(new_doc_ids, tenant)` trong `conflict.py`: trả danh sách cặp có score > τ để minh hoạ luồng end-to-end trong notebook; khi xác nhận thì thêm cạnh CONFLICTS_WITH vào đồ thị trong bộ nhớ.
 
 ## Kiểm tra
 

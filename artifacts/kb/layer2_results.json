@@ -1,0 +1,370 @@
+{
+  "dataset": "kb",
+  "config": {
+    "tenants": {
+      "policy": {
+        "FUSION_LAMBDA": 0.95,
+        "CONFLICT_THRESHOLD_TAU": 0.72,
+        "s_min": 0.5175492763519287,
+        "s_max": 0.9897818565368652,
+        "dev_f1": 0.712230215827338,
+        "ablation_tau": {
+          "s_only": 0.77,
+          "p_only": 0.3
+        }
+      },
+      "tech": {
+        "FUSION_LAMBDA": 1.0,
+        "CONFLICT_THRESHOLD_TAU": 0.75,
+        "s_min": 0.5766838788986206,
+        "s_max": 0.986145555973053,
+        "dev_f1": 0.6690140845070423,
+        "ablation_tau": {
+          "s_only": 0.75,
+          "p_only": 0.3
+        }
+      }
+    },
+    "global": {
+      "FUSION_LAMBDA": 0.95,
+      "CONFLICT_THRESHOLD_TAU": 0.72,
+      "s_min": 0.5175492763519287,
+      "s_max": 0.9897818565368652,
+      "dev_f1": 0.6865148861646234,
+      "ablation_tau": {
+        "s_only": 0.75,
+        "p_only": 0.3
+      }
+    },
+    "k_hops": 3,
+    "gamma": 0.5
+  },
+  "counts": [
+    {
+      "tenant": "policy",
+      "split": "dev",
+      "n": 444,
+      "positives": 111
+    },
+    {
+      "tenant": "policy",
+      "split": "test",
+      "n": 124,
+      "positives": 31
+    },
+    {
+      "tenant": "tech",
+      "split": "dev",
+      "n": 472,
+      "positives": 118
+    },
+    {
+      "tenant": "tech",
+      "split": "test",
+      "n": 104,
+      "positives": 26
+    }
+  ],
+  "test": [
+    {
+      "scope": "all",
+      "method": "s_only",
+      "method_label": "Chỉ s (λ = 1)",
+      "precision": 0.5432098765432098,
+      "recall": 0.7719298245614035,
+      "f1": 0.6376811594202898,
+      "pr_auc": 0.6382108409896652,
+      "tp": 44,
+      "fp": 37,
+      "fn": 13,
+      "tn": 134,
+      "n": 228,
+      "f1_ci95": [
+        0.5454211229946524,
+        0.7284284284284284
+      ]
+    },
+    {
+      "scope": "all",
+      "method": "p_only",
+      "method_label": "Chỉ p (λ = 0)",
+      "precision": 0.48,
+      "recall": 0.42105263157894735,
+      "f1": 0.4485981308411215,
+      "pr_auc": 0.41717169768049467,
+      "tp": 24,
+      "fp": 26,
+      "fn": 33,
+      "tn": 145,
+      "n": 228,
+      "f1_ci95": [
+        0.32653061224489793,
+        0.5667201834862384
+      ]
+    },
+    {
+      "scope": "all",
+      "method": "fusion",
+      "method_label": "Fusion, λ và τ theo tenant",
+      "precision": 0.5301204819277109,
+      "recall": 0.7719298245614035,
+      "f1": 0.6285714285714286,
+      "pr_auc": 0.6198244380069114,
+      "tp": 44,
+      "fp": 39,
+      "fn": 13,
+      "tn": 132,
+      "n": 228,
+      "f1_ci95": [
+        0.5342066521264994,
+        0.7210940113750418
+      ]
+    },
+    {
+      "scope": "all",
+      "method": "global",
+      "method_label": "Fusion, λ và τ chung",
+      "precision": 0.5238095238095238,
+      "recall": 0.7719298245614035,
+      "f1": 0.624113475177305,
+      "pr_auc": 0.6308181597422468,
+      "tp": 44,
+      "fp": 40,
+      "fn": 13,
+      "tn": 131,
+      "n": 228,
+      "f1_ci95": [
+        0.5245706479313037,
+        0.7152317880794702
+      ]
+    },
+    {
+      "scope": "policy",
+      "method": "s_only",
+      "method_label": "Chỉ s (λ = 1)",
+      "precision": 0.5348837209302325,
+      "recall": 0.7419354838709677,
+      "f1": 0.6216216216216216,
+      "pr_auc": 0.6516965485218467,
+      "tp": 23,
+      "fp": 20,
+      "fn": 8,
+      "tn": 73,
+      "n": 124,
+      "f1_ci95": [
+        0.4745762711864407,
+        0.7529488158899923
+      ],
+      "lambda": 1.0,
+      "tau": 0.77
+    },
+    {
+      "scope": "policy",
+      "method": "p_only",
+      "method_label": "Chỉ p (λ = 0)",
+      "precision": 0.46153846153846156,
+      "recall": 0.3870967741935484,
+      "f1": 0.42105263157894735,
+      "pr_auc": 0.4268176940017633,
+      "tp": 12,
+      "fp": 14,
+      "fn": 19,
+      "tn": 79,
+      "n": 124,
+      "f1_ci95": [
+        0.2553191489361702,
+        0.5714285714285714
+      ],
+      "lambda": 0.0,
+      "tau": 0.3
+    },
+    {
+      "scope": "policy",
+      "method": "fusion",
+      "method_label": "Fusion, λ và τ theo tenant",
+      "precision": 0.5111111111111111,
+      "recall": 0.7419354838709677,
+      "f1": 0.6052631578947368,
+      "pr_auc": 0.6345636957052145,
+      "tp": 23,
+      "fp": 22,
+      "fn": 8,
+      "tn": 71,
+      "n": 124,
+      "f1_ci95": [
+        0.47271464646464645,
+        0.7222389558232931
+      ],
+      "lambda": 0.95,
+      "tau": 0.72
+    },
+    {
+      "scope": "policy",
+      "method": "global",
+      "method_label": "Fusion, λ và τ chung",
+      "precision": 0.5111111111111111,
+      "recall": 0.7419354838709677,
+      "f1": 0.6052631578947368,
+      "pr_auc": 0.6345636957052145,
+      "tp": 23,
+      "fp": 22,
+      "fn": 8,
+      "tn": 71,
+      "n": 124,
+      "f1_ci95": [
+        0.457718875502008,
+        0.725
+      ],
+      "lambda": 0.95,
+      "tau": 0.72
+    },
+    {
+      "scope": "tech",
+      "method": "s_only",
+      "method_label": "Chỉ s (λ = 1)",
+      "precision": 0.5526315789473685,
+      "recall": 0.8076923076923077,
+      "f1": 0.65625,
+      "pr_auc": 0.6311298159999398,
+      "tp": 21,
+      "fp": 17,
+      "fn": 5,
+      "tn": 61,
+      "n": 104,
+      "f1_ci95": [
+        0.5150932400932401,
+        0.7761194029850746
+      ],
+      "lambda": 1.0,
+      "tau": 0.75
+    },
+    {
+      "scope": "tech",
+      "method": "p_only",
+      "method_label": "Chỉ p (λ = 0)",
+      "precision": 0.5,
+      "recall": 0.46153846153846156,
+      "f1": 0.48,
+      "pr_auc": 0.42484268262747954,
+      "tp": 12,
+      "fp": 12,
+      "fn": 14,
+      "tn": 66,
+      "n": 104,
+      "f1_ci95": [
+        0.29408177905308464,
+        0.6452087286527514
+      ],
+      "lambda": 0.0,
+      "tau": 0.3
+    },
+    {
+      "scope": "tech",
+      "method": "fusion",
+      "method_label": "Fusion, λ và τ theo tenant",
+      "precision": 0.5526315789473685,
+      "recall": 0.8076923076923077,
+      "f1": 0.65625,
+      "pr_auc": 0.6311298159999398,
+      "tp": 21,
+      "fp": 17,
+      "fn": 5,
+      "tn": 61,
+      "n": 104,
+      "f1_ci95": [
+        0.5082627118644067,
+        0.7826380728554642
+      ],
+      "lambda": 1.0,
+      "tau": 0.75
+    },
+    {
+      "scope": "tech",
+      "method": "global",
+      "method_label": "Fusion, λ và τ chung",
+      "precision": 0.5384615384615384,
+      "recall": 0.8076923076923077,
+      "f1": 0.6461538461538462,
+      "pr_auc": 0.6304175652876891,
+      "tp": 21,
+      "fp": 18,
+      "fn": 5,
+      "tn": 60,
+      "n": 104,
+      "f1_ci95": [
+        0.49178889847569746,
+        0.7742137096774193
+      ],
+      "lambda": 0.95,
+      "tau": 0.72
+    }
+  ],
+  "test_by_variant": [
+    {
+      "variant_type": "conflict",
+      "label": 1,
+      "n": 30,
+      "flagged_s_only": 1.0,
+      "flagged_p_only": 0.8,
+      "flagged_fusion": 1.0,
+      "flagged_global": 1.0,
+      "mean_s": 0.9681110978126526,
+      "mean_p": 0.34749943017959595
+    },
+    {
+      "variant_type": "hidden_conflict",
+      "label": 1,
+      "n": 27,
+      "flagged_s_only": 0.5185185185185185,
+      "flagged_p_only": 0.0,
+      "flagged_fusion": 0.5185185185185185,
+      "flagged_global": 0.5185185185185185,
+      "mean_s": 0.8836462497711182,
+      "mean_p": 0.0
+    },
+    {
+      "variant_type": "lexical_overlap",
+      "label": 0,
+      "n": 26,
+      "flagged_s_only": 0.0,
+      "flagged_p_only": 0.0,
+      "flagged_fusion": 0.07692307692307693,
+      "flagged_global": 0.07692307692307693,
+      "mean_s": 0.7836360335350037,
+      "mean_p": 1.8115879356628284e-05
+    },
+    {
+      "variant_type": "paraphrase",
+      "label": 0,
+      "n": 35,
+      "flagged_s_only": 1.0,
+      "flagged_p_only": 0.7428571428571429,
+      "flagged_fusion": 1.0,
+      "flagged_global": 1.0,
+      "mean_s": 0.9552484750747681,
+      "mean_p": 0.33227649331092834
+    },
+    {
+      "variant_type": "random",
+      "label": 0,
+      "n": 85,
+      "flagged_s_only": 0.0,
+      "flagged_p_only": 0.0,
+      "flagged_fusion": 0.0,
+      "flagged_global": 0.0,
+      "mean_s": 0.6646485924720764,
+      "mean_p": 0.0010549784637987614
+    },
+    {
+      "variant_type": "same_template",
+      "label": 0,
+      "n": 25,
+      "flagged_s_only": 0.08,
+      "flagged_p_only": 0.0,
+      "flagged_fusion": 0.08,
+      "flagged_global": 0.12,
+      "mean_s": 0.836631715297699,
+      "mean_p": 0.023007089272141457
+    }
+  ]
+}
