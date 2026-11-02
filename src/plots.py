@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import precision_recall_curve, roc_curve
 
-COLORS = {"s_only": "#4C78A8", "p_only": "#F58518", "fusion": "#54A24B", "global": "#B279A2"}
+COLORS = {"s_only": "#4C78A8", "p_only": "#F58518", "fusion": "#54A24B", "global": "#B279A2", "default": "#999999"}
 MODEL_COLORS = {"xgb_hard_labels": "#4C78A8", "xgb_distilled": "#54A24B", "tabpfn": "#E45756", "gbm": "#E45756"}
-METHOD_LABELS = {"s_only": "Chỉ s", "p_only": "Chỉ p", "fusion": "Fusion (theo tenant)", "global": "Fusion (τ chung)"}
+METHOD_LABELS = {"s_only": "Chỉ s", "p_only": "Chỉ p", "fusion": "Fusion (theo tenant)", "global": "Fusion (τ chung)", "default": "Mặc định (λ 0,5, τ 0,6)"}
 MODEL_LABELS = {"xgb_hard_labels": "XGBoost nhãn cứng", "xgb_distilled": "XGBoost + soft-label", "tabpfn": "TabPFN (teacher)", "gbm": "GBM (teacher)"}
 VARIANT_LABELS = {
     "conflict": "Mâu thuẫn (có cạnh)",
@@ -47,31 +47,90 @@ def vinli_cosine(sample: pd.DataFrame, summary: dict | None = None) -> plt.Figur
     return fig
 
 
-def grid_heatmap(grid: pd.DataFrame, tenant: str, ax=None, best: dict | None = None):
-    frame = grid[grid["tenant"] == tenant].pivot(index="tau", columns="lambda", values="f1").sort_index(ascending=False)
+def grid_heatmap(grid: pd.DataFrame, tenant: str, ax=None, best: dict | None = None,
+                 lambda_step: float = 0.1, tau_step: float = 0.05):
+    from src import settings
+
+    frame = grid[grid["tenant"] == tenant]
+    on_coarse_grid = _on_step(frame["lambda"], lambda_step) & _on_step(frame["tau"], tau_step)
+    table = frame[on_coarse_grid].pivot(index="tau", columns="lambda", values="f1").sort_index()
     own = ax is None
     if own:
-        fig, ax = plt.subplots(figsize=(7, 5))
-    image = ax.imshow(frame.to_numpy(), aspect="auto", cmap="viridis", vmin=0, vmax=1,
-                      extent=[frame.columns.min(), frame.columns.max(), frame.index.min(), frame.index.max()])
+        fig, ax = plt.subplots(figsize=(8, 7))
+    lambdas, taus = table.columns.to_numpy(), table.index.to_numpy()
+    mesh = ax.pcolormesh(_edges(lambdas), _edges(taus), table.to_numpy(), cmap="YlGnBu", vmin=0, vmax=1)
+    for i, tau in enumerate(taus):
+        for j, lam in enumerate(lambdas):
+            value = table.iloc[i, j]
+            ax.text(lam, tau, f"{value:.2f}", ha="center", va="center", fontsize=6.5,
+                    color="white" if value > 0.55 else "black")
+    ax.scatter([settings.DEFAULT_LAMBDA], [settings.DEFAULT_TAU], marker="X", s=180, c="#F58518", edgecolors="black",
+               zorder=3, label=f"Mặc định λ = {settings.DEFAULT_LAMBDA}, τ = {settings.DEFAULT_TAU}")
     if best:
-        ax.scatter([best["FUSION_LAMBDA"]], [best["CONFLICT_THRESHOLD_TAU"]], marker="*", s=250, c="red", edgecolors="white")
-    ax.set_xlabel("λ (trọng số của s)")
-    ax.set_ylabel("τ")
+        ax.scatter([best["FUSION_LAMBDA"]], [best["CONFLICT_THRESHOLD_TAU"]], marker="*", s=320, c="red", edgecolors="white",
+                   zorder=3, label=f"Tối ưu λ = {best['FUSION_LAMBDA']:.2f}, τ = {best['CONFLICT_THRESHOLD_TAU']:.2f}")
+    ax.set_xticks(lambdas)
+    ax.set_xticklabels([f"{v:.1f}" for v in lambdas], fontsize=7)
+    ax.set_yticks(taus)
+    ax.set_yticklabels([f"{v:.2f}" for v in taus], fontsize=7)
+    ax.set_xlabel("λ (0 = chỉ cấu trúc p, 1 = chỉ ngữ nghĩa s)")
+    ax.set_ylabel("τ (ngưỡng cảnh báo)")
     ax.set_title(f"F1 trên dev – {TENANT_LABELS.get(tenant, tenant)}")
-    plt.colorbar(image, ax=ax, label="F1")
+    ax.legend(loc="upper left", fontsize=8, framealpha=0.9)
+    plt.colorbar(mesh, ax=ax, label="F1")
     return ax.figure if own else ax
 
 
 def tenant_heatmaps(grid: pd.DataFrame, config: dict) -> plt.Figure:
     tenants = sorted(config["tenants"])
-    fig, axes = plt.subplots(1, len(tenants), figsize=(6 * len(tenants), 4.5))
+    fig, axes = plt.subplots(1, len(tenants), figsize=(8 * len(tenants), 7))
     for ax, tenant in zip(np.atleast_1d(axes), tenants):
         grid_heatmap(grid, tenant, ax=ax, best=config["tenants"][tenant])
-        cfg = config["tenants"][tenant]
-        ax.set_title(f"{TENANT_LABELS.get(tenant, tenant)}: λ = {cfg['FUSION_LAMBDA']:.2f}, τ = {cfg['CONFLICT_THRESHOLD_TAU']:.2f}")
+    fig.suptitle("Grid search λ×τ trên dev (ô hiển thị lưới thưa; điểm tối ưu tìm trên lưới bước 0,05 × 0,01)")
     fig.tight_layout()
     return fig
+
+
+def threshold_curves(grid: pd.DataFrame, config: dict) -> plt.Figure:
+    from src import settings
+
+    tenants = sorted(config["tenants"])
+    fig, axes = plt.subplots(1, len(tenants), figsize=(7 * len(tenants), 4.8), sharey=True)
+    for ax, tenant in zip(np.atleast_1d(axes), tenants):
+        cfg = config["tenants"][tenant]
+        frame = grid[grid["tenant"] == tenant]
+        tuned = frame[np.isclose(frame["lambda"], cfg["FUSION_LAMBDA"])].sort_values("tau")
+        default = frame[np.isclose(frame["lambda"], settings.DEFAULT_LAMBDA)].sort_values("tau")
+        ax.plot(tuned["tau"], tuned["precision"], color="#4C78A8", label="Precision")
+        ax.plot(tuned["tau"], tuned["recall"], color="#E45756", label="Recall")
+        ax.plot(tuned["tau"], tuned["f1"], color="#54A24B", linestyle="--", linewidth=2, label="F1")
+        ax.plot(default["tau"], default["f1"], color="#999999", linestyle=":", label=f"F1 tại λ = {settings.DEFAULT_LAMBDA}")
+        tau_best = cfg["CONFLICT_THRESHOLD_TAU"]
+        at_best = tuned[np.isclose(tuned["tau"], tau_best)].iloc[0]
+        ax.axvline(tau_best, color="red", linestyle=":", label=f"τ tối ưu = {tau_best:.2f}")
+        ax.axvline(settings.DEFAULT_TAU, color="#F58518", linestyle=":", label=f"τ mặc định = {settings.DEFAULT_TAU}")
+        ax.scatter([tau_best], [at_best["f1"]], color="red", zorder=3)
+        ax.annotate(f"P = {at_best['precision']:.2f}\nR = {at_best['recall']:.2f}\nF1 = {at_best['f1']:.2f}",
+                    (tau_best, at_best["f1"]), xytext=(10, -45), textcoords="offset points", fontsize=8,
+                    bbox={"boxstyle": "round", "fc": "white", "ec": "red"})
+        ax.set_title(f"{TENANT_LABELS.get(tenant, tenant)}: P/R/F1 theo τ tại λ = {cfg['FUSION_LAMBDA']:.2f}")
+        ax.set_xlabel("τ (ngưỡng cảnh báo)")
+        ax.set_ylim(0, 1.05)
+        ax.grid(alpha=0.3)
+        ax.legend(fontsize=7, loc="lower left")
+    np.atleast_1d(axes)[0].set_ylabel("Giá trị trên dev")
+    fig.tight_layout()
+    return fig
+
+
+def _on_step(values: pd.Series, step: float) -> pd.Series:
+    ratio = values / step
+    return np.isclose(ratio, np.round(ratio))
+
+
+def _edges(centers: np.ndarray) -> np.ndarray:
+    half = np.diff(centers) / 2
+    return np.concatenate([[centers[0] - half[0]], centers[:-1] + half, [centers[-1] + half[-1]]])
 
 
 def lambda_profile(grid: pd.DataFrame) -> plt.Figure:

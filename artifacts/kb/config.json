@@ -8,7 +8,7 @@
       "dev_f1": 0.712230215827338,
       "ablation_tau": {
         "s_only": 0.77,
-        "p_only": 0.3
+        "p_only": 0.23
       }
     },
     "tech": {
@@ -19,7 +19,7 @@
       "dev_f1": 0.6690140845070423,
       "ablation_tau": {
         "s_only": 0.75,
-        "p_only": 0.3
+        "p_only": 0.2
       }
     }
   },
@@ -31,7 +31,7 @@
     "dev_f1": 0.6865148861646234,
     "ablation_tau": {
       "s_only": 0.75,
-      "p_only": 0.3
+      "p_only": 0.2
     }
   },
   "k_hops": 3,

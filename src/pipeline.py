@@ -110,7 +110,7 @@ def layer2(dataset: str, n_bootstrap: int = 1000) -> dict:
 
 def _attach_scores(pairs: pd.DataFrame, config: dict) -> pd.DataFrame:
     pairs = pairs.copy()
-    for column in ("s_norm", "score_s_only", "score_p_only", "score_fusion", "score_global", "tau_s_only", "tau_p_only", "tau_fusion", "tau_global"):
+    for column in ("s_norm", *(f"{kind}_{method}" for kind in ("score", "tau") for method in METHODS)):
         pairs[column] = np.nan
     g = config["global"]
     for tenant, index in pairs.groupby("tenant").groups.items():
@@ -122,11 +122,13 @@ def _attach_scores(pairs: pd.DataFrame, config: dict) -> pd.DataFrame:
         pairs.loc[index, "score_p_only"] = rows["p"]
         pairs.loc[index, "score_fusion"] = fuse(s_norm, rows["p"], cfg["FUSION_LAMBDA"])
         pairs.loc[index, "score_global"] = fuse(normalize_similarity(rows["s"], g["s_min"], g["s_max"]), rows["p"], g["FUSION_LAMBDA"])
+        pairs.loc[index, "score_default"] = fuse(s_norm, rows["p"], settings.DEFAULT_LAMBDA)
         pairs.loc[index, "tau_s_only"] = cfg["ablation_tau"]["s_only"]
         pairs.loc[index, "tau_p_only"] = cfg["ablation_tau"]["p_only"]
         pairs.loc[index, "tau_fusion"] = cfg["CONFLICT_THRESHOLD_TAU"]
         pairs.loc[index, "tau_global"] = g["CONFLICT_THRESHOLD_TAU"]
-    for method in ("s_only", "p_only", "fusion", "global"):
+        pairs.loc[index, "tau_default"] = settings.DEFAULT_TAU
+    for method in METHODS:
         pairs[f"pred_{method}"] = (pairs[f"score_{method}"] > pairs[f"tau_{method}"]).astype(int)
     return pairs
 
@@ -136,6 +138,7 @@ METHODS = {
     "p_only": "Chỉ p (λ = 0)",
     "fusion": "Fusion, λ và τ theo tenant",
     "global": "Fusion, λ và τ chung",
+    "default": f"Mặc định chưa tinh chỉnh (λ = {settings.DEFAULT_LAMBDA}, τ = {settings.DEFAULT_TAU})",
 }
 
 
@@ -148,7 +151,8 @@ def _ablation_table(test: pd.DataFrame, config: dict, n_bootstrap: int) -> list[
             metrics["f1_ci95"] = _bootstrap_f1(frame, method, n_bootstrap, rng)
             if scope != "all":
                 cfg = config["global"] if method == "global" else config["tenants"][scope]
-                metrics["lambda"] = 1.0 if method == "s_only" else 0.0 if method == "p_only" else cfg["FUSION_LAMBDA"]
+                fixed_lambda = {"s_only": 1.0, "p_only": 0.0, "default": settings.DEFAULT_LAMBDA}
+                metrics["lambda"] = fixed_lambda.get(method, cfg["FUSION_LAMBDA"])
                 metrics["tau"] = float(frame[f"tau_{method}"].iloc[0])
             rows.append({"scope": scope, "method": method, "method_label": label, **metrics})
     return rows

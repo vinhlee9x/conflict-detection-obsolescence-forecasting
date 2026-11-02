@@ -224,6 +224,8 @@ show(plots.vinli_cosine(vinli, vinli_summary), "02_vinli_cosine")
 vinli_summary''',
     "md:## 3. Layer 2: grid search λ×τ và ablation",
     '''show(plots.tenant_heatmaps(grid, config), "03_grid_heatmaps")''',
+    "md:λ quyết định ưu tiên ngữ nghĩa (s, λ → 1) hay cấu trúc đồ thị (p, λ → 0); τ là ngưỡng để tránh cảnh báo vô tội vạ. Dấu X là giá trị mặc định λ = 0,5, τ = 0,6, dấu sao là cặp tối ưu chọn riêng cho từng tenant trên dev. Biểu đồ dưới cho thấy precision, recall và F1 thay đổi theo τ tại λ tối ưu.",
+    '''show(plots.threshold_curves(grid, config), "03b_threshold_curves")''',
     '''show(plots.lambda_profile(grid), "04_lambda_profile")''',
     '''table = pd.DataFrame(layer2["test"])
 table[["scope", "method_label", "lambda", "tau", "precision", "recall", "f1", "f1_ci95", "pr_auc"]].round(3)''',
