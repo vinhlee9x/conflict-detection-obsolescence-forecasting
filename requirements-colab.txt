@@ -2,3 +2,4 @@
 sentence-transformers==6.2.0
 transformers==5.22.1
 tabpfn==9.2.0
+pymongo==4.15.4

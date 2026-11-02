@@ -22,7 +22,7 @@ sys.path.insert(0, os.getcwd())
 print("Thư mục làm việc:", os.getcwd())'''
 
 DRIVE_SYNC = '''# Tuỳ chọn: giữ data/ và artifacts/ trên Google Drive giữa các session Colab
-USE_DRIVE = False
+USE_DRIVE = True
 if IN_COLAB and USE_DRIVE:
     from google.colab import drive
     drive.mount("/content/drive")
@@ -76,15 +76,50 @@ else:
     '''from src.datasets.vinli import load_vinli
 vinli_test = load_vinli("test")
 vinli_test.label.value_counts()''',
-    "md:## Jira (tuỳ chọn, giới hạn 6 giờ)\n\nTải dump từ Zenodo (doi 10.5281/zenodo.5882881), cài MongoDB, `mongorestore`, rồi đặt `RUN_JIRA = True`.",
-    '''RUN_JIRA = False
-if RUN_JIRA:
-    from src.datasets.jira_export import export_project
+    """md:## Jira (tuỳ chọn)
+
+Dữ liệu thật từ Public Jira Dataset (Montgomery và cộng sự, MSR 2022; Zenodo doi 10.5281/zenodo.5882881). Đặt `RUN_JIRA = True` rồi chạy các ô bên dưới. Notebook tự làm các bước sau:
+
+1. Cài MongoDB 8.0 và `mongorestore` qua apt (Colab chạy Ubuntu, có quyền root).
+2. Tải file zip khoảng 5,8 GB, tự tải tiếp nếu bị ngắt, rồi kiểm tra MD5.
+3. Chỉ restore các collection trong `JIRA_COLLECTIONS`. Archive được đọc thẳng từ zip, không giải nén. Restore toàn bộ dump cần khoảng 60 GB, vượt dung lượng đĩa Colab.
+4. Thống kê số issue và số link nhãn (Duplicate, Supersede, Replace) theo project. Nếu `JIRA_PROJECTS = None` thì chọn `JIRA_PROJECT_COUNT` project có nhiều link nhãn nhất trong khoảng `JIRA_PROJECT_SIZE` issue. Mỗi project là một tenant, nên Layer 2 chọn λ và τ riêng cho từng project.
+
+Mặc định là collection `Spring` với 3 project ROO, SEC, DATAMONGO (khoảng 9.700 issue). Đổi `JIRA_COLLECTIONS` nếu muốn instance khác, ví dụ `Hyperledger`, `MongoDB`, `Sakai`.
+
+Lần đầu mất khoảng 30–40 phút, chủ yếu là tải và đọc hết archive. Nên bật `USE_DRIVE` ở đầu notebook để giữ lại `data/processed/jira_*.parquet`. Session sau chỉ cần đọc parquet, không phải tải lại dump.""",
+    '''from pathlib import Path
+RUN_JIRA = False
+JIRA_COLLECTIONS = ["Spring"]
+JIRA_COLLECTION = "Spring"
+JIRA_PROJECTS = None
+JIRA_PROJECT_COUNT = 3
+JIRA_PROJECT_SIZE = (500, 5000)
+JIRA_WORKDIR = Path("/content/jira") if IN_COLAB else Path("data/raw/jira")
+JIRA_REUSE_PARQUET = True''',
+    '''jira_ready = JIRA_REUSE_PARQUET and (DATA_PROCESSED / "jira_docs.parquet").exists()
+if RUN_JIRA and not jira_ready:
+    from src.datasets import jira_setup
+    jira_setup.install_mongodb()
+    zip_path = jira_setup.download_dump(JIRA_WORKDIR)
+    mongo_uri = jira_setup.start_mongod(JIRA_WORKDIR / "mongo-data")
+    print(jira_setup.restore_collections(zip_path, JIRA_COLLECTIONS, uri=mongo_uri))
+    overview = jira_setup.project_overview(JIRA_COLLECTION, uri=mongo_uri)
+    display(overview.head(20))
+    jira_projects = JIRA_PROJECTS or jira_setup.suggest_projects(
+        overview, count=JIRA_PROJECT_COUNT, min_issues=JIRA_PROJECT_SIZE[0], max_issues=JIRA_PROJECT_SIZE[1])
+    print("Project được chọn:", jira_projects)''',
+    '''if RUN_JIRA:
     from src.datasets.jira_link_stats import link_type_counts, resolution_counts, project_summary
     from src.io_utils import write_parquet
-    jira_docs, jira_edges = export_project("mongodb://localhost:27017", "JiraRepos", "Apache", project_key="CASSANDRA")
-    write_parquet(jira_docs, DATA_PROCESSED / "jira_docs.parquet")
-    write_parquet(jira_edges, DATA_PROCESSED / "jira_edges.parquet")
+    if jira_ready:
+        jira_docs = read_parquet(DATA_PROCESSED / "jira_docs.parquet")
+        jira_edges = read_parquet(DATA_PROCESSED / "jira_edges.parquet")
+    else:
+        from src.datasets.jira_export import export_project
+        jira_docs, jira_edges = export_project(mongo_uri, jira_setup.DATABASE, JIRA_COLLECTION, project_key=jira_projects)
+        write_parquet(jira_docs, DATA_PROCESSED / "jira_docs.parquet")
+        write_parquet(jira_edges, DATA_PROCESSED / "jira_edges.parquet")
     display(project_summary(jira_docs, jira_edges))
     display(link_type_counts(jira_edges).head(20))
     display(resolution_counts(jira_docs))''',
@@ -94,7 +129,7 @@ if RUN_JIRA:
     neighbors = read_parquet(pipeline.artifact_dir("jira") / "neighbors.parquet")
     jira_pairs = build_pairs(jira_docs, jira_edges, neighbors, seed=42)
     write_parquet(jira_pairs, DATA_PROCESSED / "jira_pairs.parquet")
-    jira_pairs.groupby(["variant_type", "label"]).size()''',
+    display(jira_pairs.groupby(["variant_type", "label"]).size())''',
 ]
 
 CALIBRATE = [

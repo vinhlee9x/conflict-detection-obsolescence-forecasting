@@ -11,13 +11,15 @@ import pandas as pd
 LABEL_LINK_TYPES = ("Duplicate", "Supersede", "Supercedes", "Replace")
 
 
-def issues_from_mongo(uri: str, database: str, collection: str, project_key: str) -> Iterable[dict]:
+def issues_from_mongo(uri: str, database: str, collection: str, project_keys: str | list[str]) -> Iterable[dict]:
     from pymongo import MongoClient
 
     client = MongoClient(uri)
-    query = {"fields.project.key": project_key}
+    keys = [project_keys] if isinstance(project_keys, str) else list(project_keys)
+    query = {"fields.project.key": {"$in": keys}}
     projection = {
         "key": 1,
+        "fields.project.key": 1,
         "fields.summary": 1,
         "fields.description": 1,
         "fields.created": 1,
@@ -31,7 +33,7 @@ def issues_from_mongo(uri: str, database: str, collection: str, project_key: str
     yield from client[database][collection].find(query, projection)
 
 
-def export_issues(issues: Iterable[dict], tenant: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+def export_issues(issues: Iterable[dict], tenant: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     docs, edges = [], []
     for issue in issues:
         fields = issue.get("fields", {})
@@ -40,7 +42,7 @@ def export_issues(issues: Iterable[dict], tenant: str) -> tuple[pd.DataFrame, pd
         description = fields.get("description") or ""
         docs.append({
             "doc_id": key,
-            "tenant": tenant,
+            "tenant": tenant or (fields.get("project") or {}).get("key") or key.split("-")[0],
             "root_id": key,
             "title": summary,
             "text": f"{summary}\n{description}".strip(),
@@ -73,5 +75,5 @@ def is_label_link_type(link_type: str) -> bool:
     return any(link_type.lower().startswith(t.lower()) for t in LABEL_LINK_TYPES)
 
 
-def export_project(uri: str, database: str, collection: str, project_key: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-    return export_issues(issues_from_mongo(uri, database, collection, project_key), tenant=project_key)
+def export_project(uri: str, database: str, collection: str, project_key: str | list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+    return export_issues(issues_from_mongo(uri, database, collection, project_key))

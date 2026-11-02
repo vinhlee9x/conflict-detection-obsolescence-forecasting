@@ -57,3 +57,18 @@ def test_pairs_have_no_duplicates_self_loops_or_linked_negatives():
     negatives = pairs[pairs["label"] == 0]
     assert not any(frozenset(k) in linked for k in zip(negatives["doc_a"], negatives["doc_b"]))
     assert pairs["label"].sum() == 1 and len(negatives) == 3
+
+
+def test_export_uses_project_key_as_tenant_when_not_given():
+    issues = [_issue("A-1", "2020-01-01T00:00:00.000+0000"), _issue("B-1", "2020-01-02T00:00:00.000+0000")]
+    issues[0]["fields"]["project"] = {"key": "A"}
+    docs, _ = export_issues(issues)
+    assert docs.set_index("doc_id")["tenant"].to_dict() == {"A-1": "A", "B-1": "B"}
+
+
+def test_linked_issues_share_a_split_group():
+    docs, edges = _fixture()
+    neighbors = pd.DataFrame({"doc_id": ["P-4"], "neighbor_id": ["P-5"], "s": [0.7], "rank": [1]})
+    pairs = build_pairs(docs, edges, neighbors, negatives_per_positive=3, seed=0)
+    positive = pairs[pairs["label"] == 1].iloc[0]
+    assert positive["group_a"] == positive["group_b"] == "P-1"
