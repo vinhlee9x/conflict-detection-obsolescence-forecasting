@@ -8,6 +8,8 @@ MODEL_COLORS = {"xgb_hard_labels": "#4C78A8", "xgb_distilled": "#54A24B", "tabpf
 METHOD_LABELS = {"s_only": "Chỉ s", "p_only": "Chỉ p", "fusion": "Fusion (theo tenant)", "global": "Fusion (τ chung)", "default": "Mặc định (λ 0,5, τ 0,6)"}
 MODEL_LABELS = {"xgb_hard_labels": "XGBoost nhãn cứng", "xgb_distilled": "XGBoost + soft-label", "tabpfn": "TabPFN (teacher)", "gbm": "GBM (teacher)"}
 VARIANT_LABELS = {
+    "label_link": "Link Duplicate/Supersede",
+    "hard_negative": "Hard negative (s cao, không link)",
     "conflict": "Mâu thuẫn (có cạnh)",
     "hidden_conflict": "Mâu thuẫn ẩn",
     "paraphrase": "Diễn đạt lại",

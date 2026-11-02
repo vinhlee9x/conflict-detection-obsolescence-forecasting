@@ -59,23 +59,27 @@ def vinli_section() -> str:
     ])
 
 
-def layer2_section() -> str:
-    r = read_json(ARTIFACTS / "kb" / "layer2_results.json")
+def layer2_section(dataset: str = "kb") -> str:
+    path = ARTIFACTS / dataset / "layer2_results.json"
+    if not path.exists():
+        return ""
+    r = read_json(path)
     table = pd.DataFrame(r["test"])
-    table["scope"] = table["scope"].map(TENANT_LABELS)
+    table["scope"] = table["scope"].map(lambda t: TENANT_LABELS.get(t, t))
     table["F1 95% CI"] = table["f1_ci95"].map(lambda ci: f"[{ci[0]:.2f}, {ci[1]:.2f}]")
     columns = {"scope": "phạm vi", "method_label": "phương pháp", "lambda": "λ", "tau": "τ", "precision": "P", "recall": "R", "f1": "F1", "F1 95% CI": "F1 95% CI", "pr_auc": "PR-AUC"}
     table = table[list(columns)].rename(columns=columns).astype(object).fillna("")
     variants = pd.DataFrame(r["test_by_variant"])
-    variants["variant_type"] = variants["variant_type"].map(VARIANT_LABELS)
+    variants["variant_type"] = variants["variant_type"].map(lambda v: VARIANT_LABELS.get(v, v))
     variants = variants[["variant_type", "label", "n", "mean_s", "mean_p", "flagged_s_only", "flagged_p_only", "flagged_fusion"]]
     variants.columns = ["loại cặp", "nhãn", "n", "s TB", "p TB", "bị gắn cờ (chỉ s)", "bị gắn cờ (chỉ p)", "bị gắn cờ (fusion)"]
     configs = "; ".join(
-        f"{TENANT_LABELS[t]}: λ = {c['FUSION_LAMBDA']:.2f}, τ = {c['CONFLICT_THRESHOLD_TAU']:.2f} (F1 dev {c['dev_f1']:.3f})"
+        f"{TENANT_LABELS.get(t, t)}: λ = {c['FUSION_LAMBDA']:.2f}, τ = {c['CONFLICT_THRESHOLD_TAU']:.2f} (F1 dev {c['dev_f1']:.3f})"
         for t, c in r["config"]["tenants"].items()
     )
     return "\n\n".join([
-        "## Layer 2: phát hiện mâu thuẫn trên tập test",
+        "## Layer 2: phát hiện mâu thuẫn trên tập test" if dataset == "kb" else
+        "## Layer 2 trên Jira (dữ liệu thật, nhãn proxy Duplicate/Supersede), tập test",
         f"Tham số chọn trên dev: {configs}. K = {r['config']['k_hops']}, γ = {r['config']['gamma']}.",
         _markdown(table),
         "Tỉ lệ cặp bị gắn cờ theo từng loại (với cặp nhãn 1 đây là recall, với nhãn 0 là tỉ lệ báo nhầm):",
@@ -106,6 +110,7 @@ def main() -> None:
         dataset_section(),
         vinli_section(),
         layer2_section(),
+        layer2_section("jira"),
         layer3_section(),
     ]
     path = ROOT / "docs" / "results.md"
