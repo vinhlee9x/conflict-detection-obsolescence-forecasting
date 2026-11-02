@@ -30,7 +30,9 @@ docs/results.md              # bảng và hình cuối cùng, kèm cách tái t�
 2. Viết phần "Hạn chế" thẳng thắn: Jira dùng nhãn proxy, KB là dữ liệu tổng hợp, p yếu với mâu thuẫn ẩn.
 3. Phần kiến trúc trong báo cáo nhắc PostgreSQL + pgvector như hướng triển khai thực tế, nói rõ demo dùng numpy và NetworkX.
 4. Đưa hình từ `docs/figures/` vào slide theo thứ tự: dataset, động lực (ViNLI), Layer 2, Layer 3.
-5. Diễn tập 5–7 phút; mở sẵn notebook 04 đã chạy để trả lời nếu thầy hỏi chi tiết.
+5. Demo trực tiếp trên Colab: trước giờ báo cáo khoảng 15 phút, mở notebook 04, mount Drive chứa `artifacts/`, chạy "Run all" một lần để cài thư viện xong. Lúc báo cáo chỉ chạy lại các ô vẽ hình (CPU, vài giây). Không chạy lại embedding hay TabPFN trước mặt thầy.
+6. Nếu muốn có một bước suy luận "sống": chuẩn bị ô embed 2 tài liệu mới bằng BGE-M3 rồi tính score. Phải tải model trước giờ báo cáo, vì lần đầu tải khoảng 2 GB.
+7. Dự phòng khi mạng hoặc Colab trục trặc: lưu notebook 04 kèm output đã chạy (`.ipynb` và bản xuất HTML), mở được không cần chạy lại; slide có sẵn hình từ `docs/figures/`.
 
 ## Tiêu chí hoàn thành
 
