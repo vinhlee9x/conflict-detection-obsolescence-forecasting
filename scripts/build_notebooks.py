@@ -9,12 +9,27 @@ NOTEBOOKS = Path(__file__).resolve().parent.parent / "notebooks"
 REPO_URL = "https://github.com/vinhlee9x/conflict-detection-obsolescence-forecasting.git"
 
 SETUP = f'''import os, sys, subprocess
+from importlib import metadata
 IN_COLAB = "google.colab" in sys.modules
 if IN_COLAB:
     if not os.path.exists("/content/repo"):
         subprocess.run(["git", "clone", "{REPO_URL}", "/content/repo"], check=True)
     os.chdir("/content/repo")
+    subprocess.run(["git", "pull", "-q", "--ff-only"], check=False)
+    core = ("numpy", "pandas", "scipy", "scikit-learn", "pyarrow")
+    def installed_versions():
+        found = {{}}
+        for name in core:
+            try:
+                found[name] = metadata.version(name)
+            except metadata.PackageNotFoundError:
+                found[name] = None
+        return found
+    before = installed_versions()
     subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements-colab.txt"], check=True)
+    if installed_versions() != before:
+        print("Đã cài phiên bản mới của numpy/pandas/scipy. Runtime tự khởi động lại, đợi vài giây rồi chạy lại notebook từ đầu.")
+        os.kill(os.getpid(), 9)
 else:
     while not os.path.exists("src") and os.getcwd() != "/":
         os.chdir("..")
@@ -87,21 +102,22 @@ Dữ liệu thật từ Public Jira Dataset (Montgomery và cộng sự, MSR 202
 
 Mặc định là collection `Spring` với 3 project ROO, SEC, DATAMONGO (khoảng 9.700 issue). Đổi `JIRA_COLLECTIONS` nếu muốn instance khác, ví dụ `Hyperledger`, `MongoDB`, `Sakai`.
 
-Lần đầu mất khoảng 30–40 phút, chủ yếu là tải và đọc hết archive. Nên bật `USE_DRIVE` ở đầu notebook để giữ lại `data/processed/jira_*.parquet`. Session sau chỉ cần đọc parquet, không phải tải lại dump.""",
+Lần đầu mất khoảng 30–40 phút, chủ yếu là tải và đọc hết archive. Khi `USE_DRIVE = True`, file zip được tải thẳng vào `MyDrive/conflict-detection/jira/`, và `data/processed/jira_*.parquet` cũng nằm trên Drive. Các session sau dùng lại hai thứ này, không phải tải lại. Nếu bạn đã có sẵn file zip, chỉ cần đặt nó vào thư mục đó và giữ nguyên tên `2025-06-23 ThePublicJiraDataset.zip`, hoặc trỏ `JIRA_DUMP_DIR` tới thư mục chứa file.""",
     '''from pathlib import Path
-RUN_JIRA = False
+RUN_JIRA = True
 JIRA_COLLECTIONS = ["Spring"]
 JIRA_COLLECTION = "Spring"
 JIRA_PROJECTS = None
 JIRA_PROJECT_COUNT = 3
 JIRA_PROJECT_SIZE = (500, 5000)
 JIRA_WORKDIR = Path("/content/jira") if IN_COLAB else Path("data/raw/jira")
+JIRA_DUMP_DIR = Path("/content/drive/MyDrive/conflict-detection/jira") if IN_COLAB and USE_DRIVE else JIRA_WORKDIR
 JIRA_REUSE_PARQUET = True''',
     '''jira_ready = JIRA_REUSE_PARQUET and (DATA_PROCESSED / "jira_docs.parquet").exists()
 if RUN_JIRA and not jira_ready:
     from src.datasets import jira_setup
     jira_setup.install_mongodb()
-    zip_path = jira_setup.download_dump(JIRA_WORKDIR)
+    zip_path = jira_setup.download_dump(JIRA_DUMP_DIR)
     mongo_uri = jira_setup.start_mongod(JIRA_WORKDIR / "mongo-data")
     print(jira_setup.restore_collections(zip_path, JIRA_COLLECTIONS, uri=mongo_uri))
     overview = jira_setup.project_overview(JIRA_COLLECTION, uri=mongo_uri)

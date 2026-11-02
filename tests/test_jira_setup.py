@@ -47,3 +47,9 @@ def test_suggest_projects_raises_when_nothing_fits():
     overview = pd.DataFrame({"project": ["A"], "issues": [10], "links": [1], "label_links": [1]})
     with pytest.raises(ValueError):
         jira_setup.suggest_projects(overview)
+
+
+def test_download_dump_reuses_complete_file_without_network(tmp_path):
+    existing = tmp_path / jira_setup.ZIP_NAME
+    existing.write_bytes(b"x" * 10)
+    assert jira_setup.download_dump(tmp_path, url="http://invalid.invalid/", size=10) == existing
