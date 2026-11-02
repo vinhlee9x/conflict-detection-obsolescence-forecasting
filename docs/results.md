@@ -65,10 +65,10 @@ Tỉ lệ cặp bị gắn cờ theo từng loại (với cặp nhãn 1 đây l�
 
 ## Layer 3: dự báo lỗi thời trên các mốc test
 
-Teacher: gbm (context tối đa 3000 dòng, 10 giây). Horizon 90 ngày. Số dòng train/valid/test: 5623/838/1046, số dương: 357/45/52. Mốc test: 2024-06-01 đến 2024-09-01. α chọn trên validation: 0.7.
+Teacher: tabpfn (context tối đa 3000 dòng, 368 giây). Horizon 90 ngày. Số dòng train/valid/test: 5623/838/1046, số dương: 357/45/52. Mốc test: 2024-06-01 đến 2024-09-01. α chọn trên validation: 0.7.
 
 | mô hình | ROC-AUC | PR-AUC | P@10 | P@20 | ms / tài liệu |
 |---|---|---|---|---|---|
 | XGBoost nhãn cứng | 0.793 | 0.291 | 0.900 | 0.500 | 0.001 |
-| XGBoost + soft-label | 0.797 | 0.258 | 0.800 | 0.400 | 0.001 |
-| GBM (teacher) | 0.790 | 0.292 | 0.900 | 0.500 | 0.013 |
+| XGBoost + soft-label | 0.803 | 0.312 | 0.900 | 0.600 | 0.001 |
+| TabPFN (teacher) | 0.764 | 0.262 | 0.700 | 0.500 | 57.807 |
