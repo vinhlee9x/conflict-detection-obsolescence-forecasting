@@ -44,15 +44,17 @@ def run_streaming(command: list[str]) -> None:
 def download_dump(dest_dir: Path, url: str = ZIP_URL, size: int = ZIP_SIZE, md5: str | None = ZIP_MD5) -> Path:
     dest_dir.mkdir(parents=True, exist_ok=True)
     target = dest_dir / ZIP_NAME
-    if not (target.exists() and target.stat().st_size == size):
-        command = ["curl", "-sSfL", "--retry", "10", "--retry-all-errors", "--retry-delay", "5", "-C", "-", "-o", str(target), url]
-        process = subprocess.Popen(command)
-        while process.poll() is None:
-            done = target.stat().st_size if target.exists() else 0
-            print(f"Đã tải {done / 1e9:.2f} / {size / 1e9:.2f} GB", flush=True)
-            time.sleep(30)
-        if process.returncode != 0:
-            raise subprocess.CalledProcessError(process.returncode, command)
+    if target.exists() and target.stat().st_size == size:
+        print("Dùng lại file dump có sẵn:", target)
+        return target
+    command = ["curl", "-sSfL", "--retry", "10", "--retry-all-errors", "--retry-delay", "5", "-C", "-", "-o", str(target), url]
+    process = subprocess.Popen(command)
+    while process.poll() is None:
+        done = target.stat().st_size if target.exists() else 0
+        print(f"Đã tải {done / 1e9:.2f} / {size / 1e9:.2f} GB", flush=True)
+        time.sleep(30)
+    if process.returncode != 0:
+        raise subprocess.CalledProcessError(process.returncode, command)
     if target.stat().st_size != size:
         raise RuntimeError(f"{target} có {target.stat().st_size} byte, cần {size}. Chạy lại ô này để tải tiếp.")
     if md5 and md5sum(target) != md5:
