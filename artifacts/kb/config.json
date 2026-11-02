@@ -1,0 +1,39 @@
+{
+  "tenants": {
+    "policy": {
+      "FUSION_LAMBDA": 0.95,
+      "CONFLICT_THRESHOLD_TAU": 0.72,
+      "s_min": 0.5175492763519287,
+      "s_max": 0.9897818565368652,
+      "dev_f1": 0.712230215827338,
+      "ablation_tau": {
+        "s_only": 0.77,
+        "p_only": 0.3
+      }
+    },
+    "tech": {
+      "FUSION_LAMBDA": 1.0,
+      "CONFLICT_THRESHOLD_TAU": 0.75,
+      "s_min": 0.5766838788986206,
+      "s_max": 0.986145555973053,
+      "dev_f1": 0.6690140845070423,
+      "ablation_tau": {
+        "s_only": 0.75,
+        "p_only": 0.3
+      }
+    }
+  },
+  "global": {
+    "FUSION_LAMBDA": 0.95,
+    "CONFLICT_THRESHOLD_TAU": 0.72,
+    "s_min": 0.5175492763519287,
+    "s_max": 0.9897818565368652,
+    "dev_f1": 0.6865148861646234,
+    "ablation_tau": {
+      "s_only": 0.75,
+      "p_only": 0.3
+    }
+  },
+  "k_hops": 3,
+  "gamma": 0.5
+}
