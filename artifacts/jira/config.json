@@ -1,0 +1,50 @@
+{
+  "tenants": {
+    "DATAMONGO": {
+      "FUSION_LAMBDA": 0.95,
+      "CONFLICT_THRESHOLD_TAU": 0.5,
+      "s_min": 0.2691550552845001,
+      "s_max": 1.0000324249267578,
+      "dev_f1": 0.5791505791505792,
+      "ablation_tau": {
+        "s_only": 0.53,
+        "p_only": 0.37
+      }
+    },
+    "ROO": {
+      "FUSION_LAMBDA": 0.45,
+      "CONFLICT_THRESHOLD_TAU": 0.22,
+      "s_min": 0.2798803150653839,
+      "s_max": 0.9999637007713318,
+      "dev_f1": 0.5547785547785548,
+      "ablation_tau": {
+        "s_only": 0.49,
+        "p_only": 0.14
+      }
+    },
+    "SEC": {
+      "FUSION_LAMBDA": 0.9,
+      "CONFLICT_THRESHOLD_TAU": 0.44,
+      "s_min": 0.3045007586479187,
+      "s_max": 1.000044584274292,
+      "dev_f1": 0.5852272727272727,
+      "ablation_tau": {
+        "s_only": 0.49,
+        "p_only": 0.32
+      }
+    }
+  },
+  "global": {
+    "FUSION_LAMBDA": 0.55,
+    "CONFLICT_THRESHOLD_TAU": 0.29,
+    "s_min": 0.2691550552845001,
+    "s_max": 1.000044584274292,
+    "dev_f1": 0.562564632885212,
+    "ablation_tau": {
+      "s_only": 0.5,
+      "p_only": 0.14
+    }
+  },
+  "k_hops": 3,
+  "gamma": 0.5
+}
