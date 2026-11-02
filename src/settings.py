@@ -14,7 +14,9 @@ EDGE_WEIGHTS = {
 LABEL_EDGE_TYPES = {"CONFLICTS_WITH"}
 
 LAMBDA_GRID = np.round(np.arange(0.0, 1.0001, 0.05), 2)
-TAU_GRID = np.round(np.arange(0.30, 0.9501, 0.01), 2)
+TAU_GRID = np.round(np.arange(0.10, 0.9501, 0.01), 2)
+DEFAULT_LAMBDA = 0.5
+DEFAULT_TAU = 0.6
 
 TEST_FRACTION = 0.2
 NEGATIVES_PER_POSITIVE = 3
