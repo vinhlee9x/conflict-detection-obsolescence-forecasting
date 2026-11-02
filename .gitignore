@@ -8,3 +8,6 @@ data/raw/jira/
 data/raw/vinli/
 *.bson
 artifacts/models/
+artifacts/jira/embeddings.npz
+artifacts/jira/chunks.parquet
+artifacts/jira/neighbors.parquet

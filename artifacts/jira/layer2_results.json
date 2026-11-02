@@ -1,0 +1,521 @@
+{
+  "dataset": "jira",
+  "config": {
+    "tenants": {
+      "DATAMONGO": {
+        "FUSION_LAMBDA": 0.95,
+        "CONFLICT_THRESHOLD_TAU": 0.5,
+        "s_min": 0.2691550552845001,
+        "s_max": 1.0000324249267578,
+        "dev_f1": 0.5791505791505792,
+        "ablation_tau": {
+          "s_only": 0.53,
+          "p_only": 0.37
+        }
+      },
+      "ROO": {
+        "FUSION_LAMBDA": 0.45,
+        "CONFLICT_THRESHOLD_TAU": 0.22,
+        "s_min": 0.2798803150653839,
+        "s_max": 0.9999637007713318,
+        "dev_f1": 0.5547785547785548,
+        "ablation_tau": {
+          "s_only": 0.49,
+          "p_only": 0.14
+        }
+      },
+      "SEC": {
+        "FUSION_LAMBDA": 0.9,
+        "CONFLICT_THRESHOLD_TAU": 0.44,
+        "s_min": 0.3045007586479187,
+        "s_max": 1.000044584274292,
+        "dev_f1": 0.5852272727272727,
+        "ablation_tau": {
+          "s_only": 0.49,
+          "p_only": 0.32
+        }
+      }
+    },
+    "global": {
+      "FUSION_LAMBDA": 0.55,
+      "CONFLICT_THRESHOLD_TAU": 0.29,
+      "s_min": 0.2691550552845001,
+      "s_max": 1.000044584274292,
+      "dev_f1": 0.562564632885212,
+      "ablation_tau": {
+        "s_only": 0.5,
+        "p_only": 0.14
+      }
+    },
+    "k_hops": 3,
+    "gamma": 0.5
+  },
+  "counts": [
+    {
+      "tenant": "DATAMONGO",
+      "split": "dev",
+      "n": 468,
+      "positives": 117
+    },
+    {
+      "tenant": "DATAMONGO",
+      "split": "test",
+      "n": 80,
+      "positives": 20
+    },
+    {
+      "tenant": "ROO",
+      "split": "dev",
+      "n": 696,
+      "positives": 174
+    },
+    {
+      "tenant": "ROO",
+      "split": "test",
+      "n": 124,
+      "positives": 31
+    },
+    {
+      "tenant": "SEC",
+      "split": "dev",
+      "n": 560,
+      "positives": 140
+    },
+    {
+      "tenant": "SEC",
+      "split": "test",
+      "n": 124,
+      "positives": 31
+    }
+  ],
+  "test": [
+    {
+      "scope": "all",
+      "method": "s_only",
+      "method_label": "Chỉ s (λ = 1)",
+      "precision": 0.6338028169014085,
+      "recall": 0.5487804878048781,
+      "f1": 0.5882352941176471,
+      "pr_auc": 0.7018551953990003,
+      "tp": 45,
+      "fp": 26,
+      "fn": 37,
+      "tn": 220,
+      "n": 328,
+      "f1_ci95": [
+        0.4922580645161291,
+        0.670974370304905
+      ]
+    },
+    {
+      "scope": "all",
+      "method": "p_only",
+      "method_label": "Chỉ p (λ = 0)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.25914634146341464,
+      "tp": 0,
+      "fp": 0,
+      "fn": 82,
+      "tn": 246,
+      "n": 328,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "scope": "all",
+      "method": "fusion",
+      "method_label": "Fusion, λ và τ theo tenant",
+      "precision": 0.6438356164383562,
+      "recall": 0.573170731707317,
+      "f1": 0.6064516129032258,
+      "pr_auc": 0.6485359807056692,
+      "tp": 47,
+      "fp": 26,
+      "fn": 35,
+      "tn": 220,
+      "n": 328,
+      "f1_ci95": [
+        0.5081841109709963,
+        0.6993865030674846
+      ]
+    },
+    {
+      "scope": "all",
+      "method": "global",
+      "method_label": "Fusion, λ và τ chung",
+      "precision": 0.6615384615384615,
+      "recall": 0.524390243902439,
+      "f1": 0.5850340136054422,
+      "pr_auc": 0.7011572520008494,
+      "tp": 43,
+      "fp": 22,
+      "fn": 39,
+      "tn": 224,
+      "n": 328,
+      "f1_ci95": [
+        0.4817381043850502,
+        0.67671888053467
+      ]
+    },
+    {
+      "scope": "all",
+      "method": "default",
+      "method_label": "Mặc định chưa tinh chỉnh (λ = 0.5, τ = 0.6)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.7039366007700514,
+      "tp": 0,
+      "fp": 0,
+      "fn": 82,
+      "tn": 246,
+      "n": 328,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "scope": "DATAMONGO",
+      "method": "s_only",
+      "method_label": "Chỉ s (λ = 1)",
+      "precision": 0.6666666666666666,
+      "recall": 0.3,
+      "f1": 0.41379310344827586,
+      "pr_auc": 0.6928974178974179,
+      "tp": 6,
+      "fp": 3,
+      "fn": 14,
+      "tn": 57,
+      "n": 80,
+      "f1_ci95": [
+        0.16666666666666666,
+        0.6113095238095236
+      ],
+      "lambda": 1.0,
+      "tau": 0.53
+    },
+    {
+      "scope": "DATAMONGO",
+      "method": "p_only",
+      "method_label": "Chỉ p (λ = 0)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.25,
+      "tp": 0,
+      "fp": 0,
+      "fn": 20,
+      "tn": 60,
+      "n": 80,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ],
+      "lambda": 0.0,
+      "tau": 0.37
+    },
+    {
+      "scope": "DATAMONGO",
+      "method": "fusion",
+      "method_label": "Fusion, λ và τ theo tenant",
+      "precision": 0.7,
+      "recall": 0.35,
+      "f1": 0.4666666666666667,
+      "pr_auc": 0.6928974178974179,
+      "tp": 7,
+      "fp": 3,
+      "fn": 13,
+      "tn": 57,
+      "n": 80,
+      "f1_ci95": [
+        0.2222222222222222,
+        0.6857142857142857
+      ],
+      "lambda": 0.95,
+      "tau": 0.5
+    },
+    {
+      "scope": "DATAMONGO",
+      "method": "global",
+      "method_label": "Fusion, λ và τ chung",
+      "precision": 0.7,
+      "recall": 0.35,
+      "f1": 0.4666666666666667,
+      "pr_auc": 0.6928974178974179,
+      "tp": 7,
+      "fp": 3,
+      "fn": 13,
+      "tn": 57,
+      "n": 80,
+      "f1_ci95": [
+        0.2,
+        0.6504166666666663
+      ],
+      "lambda": 0.55,
+      "tau": 0.29
+    },
+    {
+      "scope": "DATAMONGO",
+      "method": "default",
+      "method_label": "Mặc định chưa tinh chỉnh (λ = 0.5, τ = 0.6)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.6928974178974179,
+      "tp": 0,
+      "fp": 0,
+      "fn": 20,
+      "tn": 60,
+      "n": 80,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ],
+      "lambda": 0.5,
+      "tau": 0.6
+    },
+    {
+      "scope": "ROO",
+      "method": "s_only",
+      "method_label": "Chỉ s (λ = 1)",
+      "precision": 0.53125,
+      "recall": 0.5483870967741935,
+      "f1": 0.5396825396825397,
+      "pr_auc": 0.5780784272183939,
+      "tp": 17,
+      "fp": 15,
+      "fn": 14,
+      "tn": 78,
+      "n": 124,
+      "f1_ci95": [
+        0.3845744680851064,
+        0.6753646353646353
+      ],
+      "lambda": 1.0,
+      "tau": 0.49
+    },
+    {
+      "scope": "ROO",
+      "method": "p_only",
+      "method_label": "Chỉ p (λ = 0)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.27419354838709675,
+      "tp": 0,
+      "fp": 0,
+      "fn": 31,
+      "tn": 93,
+      "n": 124,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ],
+      "lambda": 0.0,
+      "tau": 0.14
+    },
+    {
+      "scope": "ROO",
+      "method": "fusion",
+      "method_label": "Fusion, λ và τ theo tenant",
+      "precision": 0.5454545454545454,
+      "recall": 0.5806451612903226,
+      "f1": 0.5625,
+      "pr_auc": 0.5844990227518926,
+      "tp": 18,
+      "fp": 15,
+      "fn": 13,
+      "tn": 78,
+      "n": 124,
+      "f1_ci95": [
+        0.4,
+        0.6956521739130435
+      ],
+      "lambda": 0.45,
+      "tau": 0.22
+    },
+    {
+      "scope": "ROO",
+      "method": "global",
+      "method_label": "Fusion, λ và τ chung",
+      "precision": 0.5769230769230769,
+      "recall": 0.4838709677419355,
+      "f1": 0.5263157894736842,
+      "pr_auc": 0.5844990227518926,
+      "tp": 15,
+      "fp": 11,
+      "fn": 16,
+      "tn": 82,
+      "n": 124,
+      "f1_ci95": [
+        0.35555555555555557,
+        0.676923076923077
+      ],
+      "lambda": 0.55,
+      "tau": 0.29
+    },
+    {
+      "scope": "ROO",
+      "method": "default",
+      "method_label": "Mặc định chưa tinh chỉnh (λ = 0.5, τ = 0.6)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.5844990227518926,
+      "tp": 0,
+      "fp": 0,
+      "fn": 31,
+      "tn": 93,
+      "n": 124,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ],
+      "lambda": 0.5,
+      "tau": 0.6
+    },
+    {
+      "scope": "SEC",
+      "method": "s_only",
+      "method_label": "Chỉ s (λ = 1)",
+      "precision": 0.7333333333333333,
+      "recall": 0.7096774193548387,
+      "f1": 0.7213114754098361,
+      "pr_auc": 0.8355725801319625,
+      "tp": 22,
+      "fp": 8,
+      "fn": 9,
+      "tn": 85,
+      "n": 124,
+      "f1_ci95": [
+        0.5714285714285714,
+        0.8333333333333334
+      ],
+      "lambda": 1.0,
+      "tau": 0.49
+    },
+    {
+      "scope": "SEC",
+      "method": "p_only",
+      "method_label": "Chỉ p (λ = 0)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.25,
+      "tp": 0,
+      "fp": 0,
+      "fn": 31,
+      "tn": 93,
+      "n": 124,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ],
+      "lambda": 0.0,
+      "tau": 0.32
+    },
+    {
+      "scope": "SEC",
+      "method": "fusion",
+      "method_label": "Fusion, λ và τ theo tenant",
+      "precision": 0.7333333333333333,
+      "recall": 0.7096774193548387,
+      "f1": 0.7213114754098361,
+      "pr_auc": 0.8355725801319625,
+      "tp": 22,
+      "fp": 8,
+      "fn": 9,
+      "tn": 85,
+      "n": 124,
+      "f1_ci95": [
+        0.5925318761384335,
+        0.8363636363636363
+      ],
+      "lambda": 0.9,
+      "tau": 0.44
+    },
+    {
+      "scope": "SEC",
+      "method": "global",
+      "method_label": "Fusion, λ và τ chung",
+      "precision": 0.7241379310344828,
+      "recall": 0.6774193548387096,
+      "f1": 0.7,
+      "pr_auc": 0.8355725801319625,
+      "tp": 21,
+      "fp": 8,
+      "fn": 10,
+      "tn": 85,
+      "n": 124,
+      "f1_ci95": [
+        0.5454545454545454,
+        0.8214285714285714
+      ],
+      "lambda": 0.55,
+      "tau": 0.29
+    },
+    {
+      "scope": "SEC",
+      "method": "default",
+      "method_label": "Mặc định chưa tinh chỉnh (λ = 0.5, τ = 0.6)",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.8355725801319625,
+      "tp": 0,
+      "fp": 0,
+      "fn": 31,
+      "tn": 93,
+      "n": 124,
+      "f1_ci95": [
+        0.0,
+        0.0
+      ],
+      "lambda": 0.5,
+      "tau": 0.6
+    }
+  ],
+  "test_by_variant": [
+    {
+      "variant_type": "hard_negative",
+      "label": 0,
+      "n": 35,
+      "flagged_s_only": 0.6571428571428571,
+      "flagged_p_only": 0.0,
+      "flagged_fusion": 0.6571428571428571,
+      "flagged_global": 0.5714285714285714,
+      "flagged_default": 0.0,
+      "mean_s": 0.6632751822471619,
+      "mean_p": 0.0
+    },
+    {
+      "variant_type": "label_link",
+      "label": 1,
+      "n": 82,
+      "flagged_s_only": 0.5487804878048781,
+      "flagged_p_only": 0.0,
+      "flagged_fusion": 0.573170731707317,
+      "flagged_global": 0.524390243902439,
+      "flagged_default": 0.0,
+      "mean_s": 0.6775045394897461,
+      "mean_p": 0.0008710802067071199
+    },
+    {
+      "variant_type": "random",
+      "label": 0,
+      "n": 211,
+      "flagged_s_only": 0.014218009478672985,
+      "flagged_p_only": 0.0,
+      "flagged_fusion": 0.014218009478672985,
+      "flagged_global": 0.009478672985781991,
+      "flagged_default": 0.0,
+      "mean_s": 0.4729427099227905,
+      "mean_p": 0.0
+    }
+  ]
+}
