@@ -44,7 +44,7 @@ python -m src.report_tables                                  # sinh docs/results
 
 - **KB tổng hợp tiếng Việt** (`src/synth/`): 2 tenant (KB kỹ thuật, KB chính sách), 400 tài liệu gốc sinh từ template điều khoản có số liệu. Biến thể có nhãn: bản sửa mâu thuẫn, bản diễn đạt lại, mâu thuẫn ẩn (không có cạnh), tài liệu trùng từ vựng khác chủ đề. Bản mâu thuẫn và bản diễn đạt lại đều nối về bản gốc, nên cạnh đồ thị không làm lộ nhãn. Nhãn đúng theo cách sinh, kiểm tra lại bằng 100 cặp gán tay (Cohen's kappa).
 - **ViNLI**: dùng bản mirror công khai trên Hugging Face (`presencesw/vinli_4_label`) để kiểm tra cosine BGE-M3 có phân biệt mâu thuẫn hay không.
-- **Public Jira Dataset** (tuỳ chọn): code xuất dữ liệu và tạo cặp nằm trong `src/datasets/`, cần restore MongoDB dump trên Colab.
+- **Public Jira Dataset** (tuỳ chọn): đặt `RUN_JIRA = True` trong notebook 01. Notebook tự cài MongoDB, tải dump từ Zenodo (5,8 GB, có kiểm tra MD5), chỉ restore collection đã chọn (mặc định `Spring`), chọn 3 project có nhiều link Duplicate/Supersede nhất (ROO, SEC, DATAMONGO, khoảng 9.700 issue và 513 cặp dương), mỗi project là một tenant, rồi xuất `data/processed/jira_*.parquet`. Lần đầu mất khoảng 30–40 phút. Code nằm ở `src/datasets/jira_setup.py` và `jira_export.py`.
 
 Kết quả mới nhất: [docs/results.md](docs/results.md).
 

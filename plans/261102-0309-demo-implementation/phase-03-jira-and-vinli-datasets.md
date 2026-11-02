@@ -32,7 +32,7 @@ tests/test_jira_pairs.py
 
 ### Jira (timebox 6h)
 
-1. Trên Colab, tải bản dump từ [Zenodo](https://zenodo.org/doi/10.5281/zenodo.5882881), cài MongoDB, `mongorestore` chỉ các collection cần thiết.
+1. Trên Colab, tải bản dump từ [Zenodo](https://zenodo.org/doi/10.5281/zenodo.5882881), cài MongoDB, `mongorestore` chỉ các collection cần thiết. Đã tự động hoá trong `src/datasets/jira_setup.py` và notebook 01 (`RUN_JIRA = True`): bản mới nhất là record 15719919, một file zip 5,8 GB chứa `mongodump-JiraReposAnon.archive` (gzip, database `JiraReposAnon`). Restore toàn bộ cần khoảng 60 GB nên archive được stream từ zip vào `mongorestore --nsInclude` chỉ với collection đã chọn.
 2. Chọn 1–2 project có vài nghìn issue và nhiều link (ưu tiên instance nhỏ). Xuất `jira_docs` (`summary + description`, `created`, `updated`, `status`, `resolution`, `resolutiondate`) và `jira_edges` (issue link với `type`).
 3. Chạy `jira_link_stats.py` và ghi kết quả vào notebook. Quyết định nhãn dựa trên số liệu thật:
    - Nếu có link kiểu "Supersedes" hoặc "Replaces", hoặc resolution kiểu "Obsolete" hay "Won't Fix" kèm link, dùng làm nhãn sát nghĩa hơn.
@@ -59,3 +59,10 @@ WikiContradict là tuỳ chọn, chỉ thêm nếu còn thời gian.
 
 - Có `jira_pairs.parquet` với ít nhất 300 cặp dương, hoặc có ghi chú lý do bỏ Jira.
 - Có `vinli.parquet` với ba nhãn cân bằng.
+
+## Ghi chú triển khai Jira (2026-11-02)
+
+- Đã chạy thật trên máy cloud: tải dump khoảng 20 phút, restore collection `Spring` và `Hyperledger` khoảng 2 phút, không lỗi. Dump được tạo từ MongoDB 7.0.14, restore vào 8.0 có cảnh báo khác phiên bản nhưng 0 document lỗi.
+- `Hyperledger` không có project nào trong khoảng 500–5.000 issue đạt 300 cặp dương. `Spring` với ROO, SEC, DATAMONGO cho 9.727 issue và 513 cạnh nhãn (Duplicate 166 trong ROO, còn lại là Supersede và Duplicate ở hai project kia), nên chọn làm mặc định.
+- Nhóm chia dev/test của Jira là thành phần liên thông theo link. Chia theo từng issue thì cả hai đầu một cặp Duplicate chỉ cùng rơi vào test khoảng 4%, test chỉ còn 16 cặp dương. Sau khi sửa, test có 100 dương và 300 âm.
+- Chạy thử với baseline TF-IDF trên CPU: F1 test của s khoảng 0,62, p bằng 0 vì cạnh nhãn bị loại và link còn lại hiếm khi nối hai issue trùng nhau. Số liệu chính thức cần chạy BGE-M3 trên Colab.

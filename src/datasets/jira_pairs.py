@@ -2,6 +2,7 @@
 supersede-like type), negatives are high-similarity unlinked neighbors (hard)
 plus random pairs from the same project."""
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -18,9 +19,10 @@ def build_pairs(
     tenant_of = docs.set_index("doc_id")["tenant"].to_dict()
     issued = docs.set_index("doc_id")["issued_at"].to_dict()
     linked = {frozenset((a, b)) for a, b in zip(edges["src"], edges["dst"])}
+    group_of = link_groups(docs, edges)
 
     positives = edges[edges["is_label_edge"]]
-    rows = [_pair(a, b, 1, "label_link", tenant_of, issued) for a, b in zip(positives["src"], positives["dst"])]
+    rows = [_pair(a, b, 1, "label_link", tenant_of, issued, group_of) for a, b in zip(positives["src"], positives["dst"])]
     rows = list({frozenset((r["doc_a"], r["doc_b"])): r for r in rows}.values())
     taken = {frozenset((r["doc_a"], r["doc_b"])) for r in rows}
     n_positive = len(rows)
@@ -35,7 +37,7 @@ def build_pairs(
         if key in taken or key in linked:
             continue
         taken.add(key)
-        rows.append(_pair(a, b, 0, "hard_negative", tenant_of, issued))
+        rows.append(_pair(a, b, 0, "hard_negative", tenant_of, issued, group_of))
 
     ids = docs["doc_id"].to_numpy()
     target = len(rows) + (n_negative - n_hard)
@@ -47,18 +49,26 @@ def build_pairs(
         if key in taken or key in linked or tenant_of[a] != tenant_of[b]:
             continue
         taken.add(key)
-        rows.append(_pair(a, b, 0, "random", tenant_of, issued))
+        rows.append(_pair(a, b, 0, "random", tenant_of, issued, group_of))
     return pd.DataFrame(rows)
 
 
-def _pair(a, b, label, variant_type, tenant_of, issued) -> dict:
+def link_groups(docs: pd.DataFrame, edges: pd.DataFrame) -> dict[str, str]:
+    # Per-issue groups would leave both ends of a link in test only ~4% of the time.
+    graph = nx.Graph()
+    graph.add_nodes_from(docs["doc_id"])
+    graph.add_edges_from(zip(edges["src"], edges["dst"]))
+    return {doc: min(component) for component in nx.connected_components(graph) for doc in component}
+
+
+def _pair(a, b, label, variant_type, tenant_of, issued, group_of) -> dict:
     first, second = (a, b) if issued[a] <= issued[b] else (b, a)
     return {
         "doc_a": first,
         "doc_b": second,
         "tenant": tenant_of[first],
-        "group_a": first,
-        "group_b": second,
+        "group_a": group_of[first],
+        "group_b": group_of[second],
         "label": label,
         "variant_type": variant_type,
     }
