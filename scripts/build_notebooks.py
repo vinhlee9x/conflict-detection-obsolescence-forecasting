@@ -9,12 +9,27 @@ NOTEBOOKS = Path(__file__).resolve().parent.parent / "notebooks"
 REPO_URL = "https://github.com/vinhlee9x/conflict-detection-obsolescence-forecasting.git"
 
 SETUP = f'''import os, sys, subprocess
+from importlib import metadata
 IN_COLAB = "google.colab" in sys.modules
 if IN_COLAB:
     if not os.path.exists("/content/repo"):
         subprocess.run(["git", "clone", "{REPO_URL}", "/content/repo"], check=True)
     os.chdir("/content/repo")
+    subprocess.run(["git", "pull", "-q", "--ff-only"], check=False)
+    core = ("numpy", "pandas", "scipy", "scikit-learn", "pyarrow")
+    def installed_versions():
+        found = {{}}
+        for name in core:
+            try:
+                found[name] = metadata.version(name)
+            except metadata.PackageNotFoundError:
+                found[name] = None
+        return found
+    before = installed_versions()
     subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements-colab.txt"], check=True)
+    if installed_versions() != before:
+        print("Đã cài phiên bản mới của numpy/pandas/scipy. Runtime tự khởi động lại, đợi vài giây rồi chạy lại notebook từ đầu.")
+        os.kill(os.getpid(), 9)
 else:
     while not os.path.exists("src") and os.getcwd() != "/":
         os.chdir("..")
@@ -89,7 +104,7 @@ Mặc định là collection `Spring` với 3 project ROO, SEC, DATAMONGO (kho�
 
 Lần đầu mất khoảng 30–40 phút, chủ yếu là tải và đọc hết archive. Nên bật `USE_DRIVE` ở đầu notebook để giữ lại `data/processed/jira_*.parquet`. Session sau chỉ cần đọc parquet, không phải tải lại dump.""",
     '''from pathlib import Path
-RUN_JIRA = False
+RUN_JIRA = True
 JIRA_COLLECTIONS = ["Spring"]
 JIRA_COLLECTION = "Spring"
 JIRA_PROJECTS = None
