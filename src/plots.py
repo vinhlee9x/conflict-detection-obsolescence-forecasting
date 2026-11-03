@@ -49,13 +49,13 @@ def vinli_cosine(sample: pd.DataFrame, summary: dict | None = None) -> plt.Figur
     return fig
 
 
-def grid_heatmap(grid: pd.DataFrame, tenant: str, ax=None, best: dict | None = None):
+def grid_heatmap(grid: pd.DataFrame, tenant: str, ax=None, best: dict | None = None,
+                 lambda_step: float = 0.1, tau_step: float = 0.05):
     from src import settings
 
     frame = grid[grid["tenant"] == tenant]
-    # Display every evaluated (λ, τ) point. Coarse-step filtering is no longer
-    # needed after the search itself was reduced to a 9×9 grid.
-    table = frame.pivot(index="tau", columns="lambda", values="f1").sort_index()
+    on_coarse_grid = _on_step(frame["lambda"], lambda_step) & _on_step(frame["tau"], tau_step)
+    table = frame[on_coarse_grid].pivot(index="tau", columns="lambda", values="f1").sort_index()
     own = ax is None
     if own:
         fig, ax = plt.subplots(figsize=(8, 7))
@@ -88,7 +88,7 @@ def tenant_heatmaps(grid: pd.DataFrame, config: dict) -> plt.Figure:
     fig, axes = plt.subplots(1, len(tenants), figsize=(8 * len(tenants), 7))
     for ax, tenant in zip(np.atleast_1d(axes), tenants):
         grid_heatmap(grid, tenant, ax=ax, best=config["tenants"][tenant])
-    fig.suptitle("Grid search λ×τ trên dev (lưới 9×9)")
+    fig.suptitle("Grid search λ×τ trên dev (ô hiển thị lưới thưa; điểm tối ưu tìm trên lưới bước 0,05 × 0,01)")
     fig.tight_layout()
     return fig
 
@@ -123,6 +123,11 @@ def threshold_curves(grid: pd.DataFrame, config: dict) -> plt.Figure:
     np.atleast_1d(axes)[0].set_ylabel("Giá trị trên dev")
     fig.tight_layout()
     return fig
+
+
+def _on_step(values: pd.Series, step: float) -> pd.Series:
+    ratio = values / step
+    return np.isclose(ratio, np.round(ratio))
 
 
 def _edges(centers: np.ndarray) -> np.ndarray:

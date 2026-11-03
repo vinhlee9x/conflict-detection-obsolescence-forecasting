@@ -13,8 +13,8 @@ EDGE_WEIGHTS = {
 }
 LABEL_EDGE_TYPES = {"CONFLICTS_WITH"}
 
-LAMBDA_GRID = np.round(np.linspace(0.0, 1.0, 9), 2)
-TAU_GRID = np.round(np.linspace(0.10, 0.95, 9), 2)
+LAMBDA_GRID = np.round(np.arange(0.0, 1.0001, 0.05), 2)
+TAU_GRID = np.round(np.arange(0.10, 0.9501, 0.01), 2)
 DEFAULT_LAMBDA = 0.5
 DEFAULT_TAU = 0.6
 
