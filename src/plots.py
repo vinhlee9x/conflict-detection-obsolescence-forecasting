@@ -88,7 +88,7 @@ def tenant_heatmaps(grid: pd.DataFrame, config: dict) -> plt.Figure:
     fig, axes = plt.subplots(1, len(tenants), figsize=(8 * len(tenants), 7))
     for ax, tenant in zip(np.atleast_1d(axes), tenants):
         grid_heatmap(grid, tenant, ax=ax, best=config["tenants"][tenant])
-    fig.suptitle("Grid search λ×τ trên dev (ô hiển thị lưới thưa; điểm tối ưu tìm trên lưới bước 0,05 × 0,01)")
+    fig.suptitle("Grid search λ×τ trên dev (ô hiển thị lưới thưa; điểm tối ưu tìm trên lưới 9×9)")
     fig.tight_layout()
     return fig
 
