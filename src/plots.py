@@ -72,7 +72,7 @@ def grid_heatmap(grid: pd.DataFrame, tenant: str, ax=None, best: dict | None = N
         ax.scatter([best["FUSION_LAMBDA"]], [best["CONFLICT_THRESHOLD_TAU"]], marker="*", s=320, c="red", edgecolors="white",
                    zorder=3, label=f"Tối ưu λ = {best['FUSION_LAMBDA']:.2f}, τ = {best['CONFLICT_THRESHOLD_TAU']:.2f}")
     ax.set_xticks(lambdas)
-    ax.set_xticklabels([f"{v:.1f}" for v in lambdas], fontsize=7)
+    ax.set_xticklabels([f"{v:.2f}" for v in lambdas], fontsize=7)
     ax.set_yticks(taus)
     ax.set_yticklabels([f"{v:.2f}" for v in taus], fontsize=7)
     ax.set_xlabel("λ (0 = chỉ cấu trúc p, 1 = chỉ ngữ nghĩa s)")
